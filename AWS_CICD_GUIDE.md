@@ -8,6 +8,8 @@ Esta guia describe el despliegue de Carpool UTEC en una cuenta temporal de AWS A
 - SSM Parameter Store para variables sensibles.
 - GitHub Actions para construir, probar y desplegar manualmente.
 
+Los valores escritos entre `< >` son referencias que deben reemplazarse durante la configuracion. No representan credenciales reales y ningun secreto debe guardarse en Git.
+
 ## Arquitectura
 
 ```text

@@ -4,7 +4,7 @@ Este proyecto es una API Spring Boot con Java 17. Para la entrega, el despliegue
 
 ## Build local
 
-Primero crea tu archivo local `.env` a partir de la plantilla:
+Primero crea tu archivo local `.env` a partir de la plantilla. Este archivo contiene credenciales de desarrollo y no debe subirse al repositorio:
 
 ```bash
 cp .env.example .env
@@ -32,23 +32,23 @@ El `docker-compose.yml` levanta PostgreSQL local y la API. Para AWS normalmente 
 Si usas PostgreSQL/RDS, configura estas variables en `.env`:
 
 ```text
-SPRING_DATASOURCE_URL=jdbc:postgresql://HOST:5432/DB
-SPRING_DATASOURCE_USERNAME=USER
-SPRING_DATASOURCE_PASSWORD=PASSWORD
+SPRING_DATASOURCE_URL=jdbc:postgresql://<HOST>:5432/<DB_NAME>
+SPRING_DATASOURCE_USERNAME=<DB_USER>
+SPRING_DATASOURCE_PASSWORD=<DB_PASSWORD>
 ```
 
 ## Subir a Amazon ECR
 
-Reemplaza `AWS_REGION`, `ACCOUNT_ID` y el nombre del repositorio si deseas otro.
+Reemplaza `<AWS_REGION>`, `<AWS_ACCOUNT_ID>` y el nombre del repositorio si deseas otro.
 
 ```bash
-aws ecr create-repository --repository-name carpultec-api --region AWS_REGION
+aws ecr create-repository --repository-name carpultec-api --region <AWS_REGION>
 
-aws ecr get-login-password --region AWS_REGION | docker login --username AWS --password-stdin ACCOUNT_ID.dkr.ecr.AWS_REGION.amazonaws.com
+aws ecr get-login-password --region <AWS_REGION> | docker login --username AWS --password-stdin <AWS_ACCOUNT_ID>.dkr.ecr.<AWS_REGION>.amazonaws.com
 
 docker build -t carpultec-api .
-docker tag carpultec-api:latest ACCOUNT_ID.dkr.ecr.AWS_REGION.amazonaws.com/carpultec-api:latest
-docker push ACCOUNT_ID.dkr.ecr.AWS_REGION.amazonaws.com/carpultec-api:latest
+docker tag carpultec-api:latest <AWS_ACCOUNT_ID>.dkr.ecr.<AWS_REGION>.amazonaws.com/carpultec-api:latest
+docker push <AWS_ACCOUNT_ID>.dkr.ecr.<AWS_REGION>.amazonaws.com/carpultec-api:latest
 ```
 
 ## Variables para el servicio en AWS
@@ -71,22 +71,18 @@ JAVA_OPTS=-XX:MaxRAMPercentage=75
 | Recurso | Configuracion |
 | --- | --- |
 | Entorno | AWS Academy Learner Lab |
-| Region | [Completar segun restriccion del laboratorio] |
+| Region | Por registrar segun restriccion del laboratorio |
 | Repositorio ECR | `carpultec-api` |
 | Cluster ECS | `carpultec-api` |
 | Servicio ECS | `backend-task` |
 | Base de datos RDS | `carpultec` |
-| URL publica | [Agregar URL publica de AWS] |
+| URL publica | Por registrar al finalizar el despliegue |
 
-## CI/CD con GitHub Actions y ECS
+## Despliegue Con GitHub Actions Y ECS
 
-Para despliegue continuo en ECS Fargate, revisa [AWS_CICD_GUIDE.md](./AWS_CICD_GUIDE.md). El repo incluye:
+Para ejecutar el despliegue controlado en ECS Fargate, revisa [AWS_CICD_GUIDE.md](./AWS_CICD_GUIDE.md). El repositorio incluye:
 
 - `.github/workflows/deploy-ecs.yml`
 - `aws/ecs-task-definition.json`
 
-El workflow se mantiene en ejecucion manual mientras se configuran los recursos y credenciales temporales del Learner Lab. Al completar el despliegue, registrar aqui el enlace a la ejecucion exitosa:
-
-```text
-[Agregar enlace de GitHub Actions]
-```
+El workflow se mantiene en ejecucion manual mientras se configuran los recursos y credenciales temporales del Learner Lab. El enlace de la ejecucion exitosa se incorporara como evidencia al finalizar el despliegue.
