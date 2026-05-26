@@ -40,6 +40,48 @@ jobs:
           aws-session-token: ${{ secrets.AWS_SESSION_TOKEN }}
           aws-region: ${{ env.AWS_REGION }}
 
+      - name: Validate deploy configuration
+        env:
+          DB_URL: ${{ secrets.DB_URL }}
+          DB_USERNAME: ${{ secrets.DB_USERNAME }}
+          DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
+          APP_JWT_SECRET: ${{ secrets.APP_JWT_SECRET }}
+          GOOGLE_MAPS_API_KEY: ${{ secrets.GOOGLE_MAPS_API_KEY }}
+          CORS_ORIGINS: ${{ secrets.CORS_ORIGINS }}
+        run: |
+          for name in AWS_REGION ECS_CLUSTER ECS_SERVICE DB_URL DB_USERNAME DB_PASSWORD APP_JWT_SECRET GOOGLE_MAPS_API_KEY CORS_ORIGINS; do
+            if [ -z "${!name}" ]; then
+              echo "::error::Falta configurar el secret $name en GitHub Actions."
+              exit 1
+            fi
+          done
+
+      - name: Sync application parameters to SSM
+        env:
+          DB_URL: ${{ secrets.DB_URL }}
+          DB_USERNAME: ${{ secrets.DB_USERNAME }}
+          DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
+          APP_JWT_SECRET: ${{ secrets.APP_JWT_SECRET }}
+          GOOGLE_MAPS_API_KEY: ${{ secrets.GOOGLE_MAPS_API_KEY }}
+          CORS_ORIGINS: ${{ secrets.CORS_ORIGINS }}
+        run: |
+          put_parameter() {
+            aws ssm put-parameter \
+              --name "$1" \
+              --value "$2" \
+              --type SecureString \
+              --overwrite \
+              --region "$AWS_REGION" \
+              --no-cli-pager > /dev/null
+          }
+
+          put_parameter "/carpultec/prod/spring-datasource-url" "$DB_URL"
+          put_parameter "/carpultec/prod/spring-datasource-username" "$DB_USERNAME"
+          put_parameter "/carpultec/prod/spring-datasource-password" "$DB_PASSWORD"
+          put_parameter "/carpultec/prod/app-jwt-secret" "$APP_JWT_SECRET"
+          put_parameter "/carpultec/prod/google-maps-api-key" "$GOOGLE_MAPS_API_KEY"
+          put_parameter "/carpultec/prod/cors-origins" "$CORS_ORIGINS"
+
       - name: Login to Amazon ECR
         id: login-ecr
         uses: aws-actions/amazon-ecr-login@v2
@@ -54,6 +96,11 @@ jobs:
           docker push "$ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG"
           echo "image=$ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG" >> "$GITHUB_OUTPUT"
 
+      - name: Apply current Learner Lab values to task definition
+        run: |
+          AWS_ACCOUNT_ID="$(aws sts get-caller-identity --query Account --output text)"
+          sed -i "s|<AWS_ACCOUNT_ID>|$AWS_ACCOUNT_ID|g; s|<AWS_REGION>|$AWS_REGION|g" "$ECS_TASK_DEFINITION"
+
       - name: Render Amazon ECS task definition
         id: task-def
         uses: aws-actions/amazon-ecs-render-task-definition@v1
@@ -61,6 +108,15 @@ jobs:
           task-definition: ${{ env.ECS_TASK_DEFINITION }}
           container-name: ${{ env.CONTAINER_NAME }}
           image: ${{ steps.build-image.outputs.image }}
+
+      - name: Configure load balancer startup grace period
+        run: |
+          aws ecs update-service \
+            --cluster "$ECS_CLUSTER" \
+            --service "$ECS_SERVICE" \
+            --health-check-grace-period-seconds 180 \
+            --region "$AWS_REGION" \
+            --no-cli-pager > /dev/null
 
       - name: Deploy Amazon ECS task definition
         uses: aws-actions/amazon-ecs-deploy-task-definition@v2

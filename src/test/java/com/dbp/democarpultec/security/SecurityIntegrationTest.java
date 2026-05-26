@@ -48,6 +48,13 @@ class SecurityIntegrationTest extends PostgresContainerTest {
     }
 
     @Test
+    void shouldAllowHealthCheckWithoutTokenForLoadBalancer() throws Exception {
+        mockMvc.perform(get("/actuator/health"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.status").value("UP"));
+    }
+
+    @Test
     void shouldAllowRegistrationRouteWithoutToken() throws Exception {
         mockMvc.perform(post("/api/auth/register")
                         .contentType(MediaType.APPLICATION_JSON)

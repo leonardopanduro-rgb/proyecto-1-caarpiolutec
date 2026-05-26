@@ -143,6 +143,7 @@ controller -> service -> repository -> model
 | Google Maps API | Consulta de rutas y coordenadas |
 | JavaMailSender | Envio de correos y notificaciones |
 | Docker | Ejecucion local de PostgreSQL y preparacion para despliegue |
+| Spring Boot Actuator | Endpoint de salud utilizado por Docker y AWS ECS/ALB |
 
 ## Endpoints Principales
 
@@ -160,6 +161,7 @@ controller -> service -> repository -> model
 | `POST` | `/api/reviews` | Califica a un participante del viaje | Autenticado |
 | `GET` | `/api/users/me` | Consulta el perfil y rating propios | Autenticado |
 | `GET` | `/api/users/{id}` | Consulta el usuario y su rating calculado | Administrador |
+| `GET` | `/actuator/health` | Verifica disponibilidad del backend | Publico |
 
 Las rutas de viajes y pasajeros se utilizan para consulta del flujo confirmado. La creacion de estas entidades ocurre durante la aceptacion de solicitudes.
 
@@ -231,7 +233,7 @@ La aplicacion cuenta con pruebas de repositorios, servicios, controladores, segu
 En la revision funcional previa al despliegue se obtuvo:
 
 ```text
-Tests run: 200, Failures: 0, Errors: 0, Skipped: 0
+Tests run: 201, Failures: 0, Errors: 0, Skipped: 0
 BUILD SUCCESS
 ```
 
@@ -272,5 +274,5 @@ El despliegue de entrega se realizara en la cuenta AWS Academy Learner Lab del e
 | Base de datos RDS | `carpultec` |
 | URL publica de la API | Por registrar al finalizar el despliegue |
 
-Las credenciales de base de datos se proporcionaran al contenedor mediante parametros seguros de AWS. La clave JWT y la clave de Google Maps se configuraran de igual manera, sin subir secretos al repositorio.
+Las credenciales de base de datos se proporcionaran al contenedor mediante parametros seguros de AWS. La clave JWT y la clave de Google Maps se configuraran de igual manera, sin subir secretos al repositorio. El balanceador consultara `/actuator/health` para confirmar que la aplicacion inicio correctamente antes de dirigir trafico.
 

@@ -30,6 +30,18 @@
         {
           "name": "JAVA_OPTS",
           "value": "-XX:MaxRAMPercentage=75"
+        },
+        {
+          "name": "GOOGLE_MAPS_BASE_URL",
+          "value": "https://maps.googleapis.com/maps/api"
+        },
+        {
+          "name": "APP_JWT_EXPIRATION_MS",
+          "value": "86400000"
+        },
+        {
+          "name": "APP_JWT_REFRESH_EXPIRATION_MS",
+          "value": "604800000"
         }
       ],
       "secrets": [
@@ -58,6 +70,16 @@
           "valueFrom": "arn:aws:ssm:<AWS_REGION>:<AWS_ACCOUNT_ID>:parameter/carpultec/prod/cors-origins"
         }
       ],
+      "healthCheck": {
+        "command": [
+          "CMD-SHELL",
+          "wget -qO- http://localhost:8080/actuator/health || exit 1"
+        ],
+        "interval": 30,
+        "timeout": 5,
+        "retries": 3,
+        "startPeriod": 120
+      },
       "logConfiguration": {
         "logDriver": "awslogs",
         "options": {
