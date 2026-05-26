@@ -4,12 +4,12 @@
   "requiresCompatibilities": ["FARGATE"],
   "cpu": "512",
   "memory": "1024",
-  "executionRoleArn": "arn:aws:iam::375170594920:role/ecsTaskExecutionRole",
-  "taskRoleArn": "arn:aws:iam::375170594920:role/carpultec-api-task-role",
+  "executionRoleArn": "arn:aws:iam::<AWS_ACCOUNT_ID>:role/LabRole",
+  "taskRoleArn": "arn:aws:iam::<AWS_ACCOUNT_ID>:role/LabRole",
   "containerDefinitions": [
     {
       "name": "backend-task",
-      "image": "375170594920.dkr.ecr.us-east-2.amazonaws.com/carpultec-api:latest",
+      "image": "<IMAGE_URI>",
       "essential": true,
       "portMappings": [
         {
@@ -35,22 +35,34 @@
       "secrets": [
         {
           "name": "SPRING_DATASOURCE_URL",
-          "valueFrom": "arn:aws:ssm:us-east-2:375170594920:parameter/carpultec/prod/spring-datasource-url"
+          "valueFrom": "arn:aws:ssm:<AWS_REGION>:<AWS_ACCOUNT_ID>:parameter/carpultec/prod/spring-datasource-url"
         },
         {
           "name": "SPRING_DATASOURCE_USERNAME",
-          "valueFrom": "arn:aws:ssm:us-east-2:375170594920:parameter/carpultec/prod/spring-datasource-username"
+          "valueFrom": "arn:aws:ssm:<AWS_REGION>:<AWS_ACCOUNT_ID>:parameter/carpultec/prod/spring-datasource-username"
         },
         {
           "name": "SPRING_DATASOURCE_PASSWORD",
-          "valueFrom": "arn:aws:ssm:us-east-2:375170594920:parameter/carpultec/prod/spring-datasource-password"
+          "valueFrom": "arn:aws:ssm:<AWS_REGION>:<AWS_ACCOUNT_ID>:parameter/carpultec/prod/spring-datasource-password"
+        },
+        {
+          "name": "APP_JWT_SECRET",
+          "valueFrom": "arn:aws:ssm:<AWS_REGION>:<AWS_ACCOUNT_ID>:parameter/carpultec/prod/app-jwt-secret"
+        },
+        {
+          "name": "GOOGLE_MAPS_API_KEY",
+          "valueFrom": "arn:aws:ssm:<AWS_REGION>:<AWS_ACCOUNT_ID>:parameter/carpultec/prod/google-maps-api-key"
+        },
+        {
+          "name": "CORS_ORIGINS",
+          "valueFrom": "arn:aws:ssm:<AWS_REGION>:<AWS_ACCOUNT_ID>:parameter/carpultec/prod/cors-origins"
         }
       ],
       "logConfiguration": {
         "logDriver": "awslogs",
         "options": {
-          "awslogs-group": "/ecs/backend-task",
-          "awslogs-region": "us-east-2",
+          "awslogs-group": "/ecs/carpultec-api",
+          "awslogs-region": "<AWS_REGION>",
           "awslogs-stream-prefix": "ecs"
         }
       }

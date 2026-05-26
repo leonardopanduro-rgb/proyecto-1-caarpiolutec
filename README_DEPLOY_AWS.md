@@ -1,6 +1,6 @@
-# Deploy en AWS con Docker
+# Deploy en AWS Academy con Docker
 
-Este proyecto es una API Spring Boot con Java 17. El contenedor expone el puerto `8080` y acepta el puerto mediante la variable `PORT`, util para servicios como ECS, App Runner o Elastic Beanstalk.
+Este proyecto es una API Spring Boot con Java 17. Para la entrega, el despliegue se realiza en AWS Academy Learner Lab usando Amazon ECR, ECS Fargate y RDS PostgreSQL. El contenedor expone el puerto `8080` y acepta el puerto mediante la variable `PORT`.
 
 ## Build local
 
@@ -60,16 +60,33 @@ PORT=8080
 SPRING_DATASOURCE_URL=jdbc:postgresql://<rds-endpoint>:5432/<database>
 SPRING_DATASOURCE_USERNAME=<usuario>
 SPRING_DATASOURCE_PASSWORD=<password>
+APP_JWT_SECRET=<secret-base64-seguro>
+GOOGLE_MAPS_API_KEY=<clave-configurada-como-secreto>
+CORS_ORIGINS=<origenes-permitidos>
 JAVA_OPTS=-XX:MaxRAMPercentage=75
 ```
 
-## Recomendacion de despliegue
+## Recursos De La Entrega En Learner Lab
 
-Para un despliegue simple, usa AWS App Runner con la imagen de ECR y puerto `8080`. Para mayor control de red, secretos y escalado, usa ECS Fargate con RDS PostgreSQL en la misma VPC.
+| Recurso | Configuracion |
+| --- | --- |
+| Entorno | AWS Academy Learner Lab |
+| Region | [Completar segun restriccion del laboratorio] |
+| Repositorio ECR | `carpultec-api` |
+| Cluster ECS | `carpultec-api` |
+| Servicio ECS | `backend-task` |
+| Base de datos RDS | `carpultec` |
+| URL publica | [Agregar URL publica de AWS] |
 
 ## CI/CD con GitHub Actions y ECS
 
-Para despliegue continuo en ECS Fargate, revisa [AWS_CICD_GUIDE.md](C:/Users/Ary/Desktop/carpUlTEC2/AWS_CICD_GUIDE.md). El repo incluye:
+Para despliegue continuo en ECS Fargate, revisa [AWS_CICD_GUIDE.md](./AWS_CICD_GUIDE.md). El repo incluye:
 
 - `.github/workflows/deploy-ecs.yml`
 - `aws/ecs-task-definition.json`
+
+El workflow se mantiene en ejecucion manual mientras se configuran los recursos y credenciales temporales del Learner Lab. Al completar el despliegue, registrar aqui el enlace a la ejecucion exitosa:
+
+```text
+[Agregar enlace de GitHub Actions]
+```

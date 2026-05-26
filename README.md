@@ -1,5 +1,7 @@
 # Carpool UTEC
 
+[![Review Assignment Due Date](https://classroom.github.com/assets/deadline-readme-button-22041afd0340ce965d47ae6ef1cefeee28c7c493a6346c4f15d667ab976d596c.svg)](https://classroom.github.com/a/qZKM4_z6)
+
 API REST para coordinar viajes compartidos entre estudiantes de la Universidad de Ingenieria y Tecnologia (UTEC). El proyecto busca facilitar que los estudiantes que se movilizan hacia o desde el campus puedan ofrecer asientos disponibles o solicitar un traslado, manteniendo un registro de solicitudes, viajes confirmados y calificaciones.
 
 ## Informacion Del Proyecto
@@ -10,15 +12,17 @@ API REST para coordinar viajes compartidos entre estudiantes de la Universidad d
 | Periodo | 2026-1 |
 | Proyecto | Carpool UTEC |
 | Backend | Spring Boot |
-| Repositorio de entrega | [CARPOOL-UTEC-VF](https://github.com/josegc02/carpUlTEC/tree/CARPOOL-UTEC-VF) |
+| Repositorio de entrega | [GitHub Classroom](https://github.com/CS2031-DBP/proyecto-1-caarpiolutec) |
 
 ### Integrantes
 
 | Nombre | Codigo |
 | --- | --- |
-| [Agregar integrante] | [Agregar codigo] |
-| [Agregar integrante] | [Agregar codigo] |
-| [Agregar integrante] | [Agregar codigo] |
+| Leonardo Daniel Panduro Chinchay | 202520231 |
+| Ary Fernando Sanchez Cerna | 201920061 |
+| Walter Sebastian Aquino Pachas | 202410070 |
+| Franco Andres Tapia Retamozo | 202210345 |
+| Jose Ernesto Guerrero Cueva | [Agregar codigo] |
 
 ## Problema Que Atiende
 
@@ -167,7 +171,7 @@ La aplicacion incluye un servicio para obtener informacion geografica necesaria 
 $env:GOOGLE_MAPS_API_KEY="TU_CLAVE_DE_GOOGLE_MAPS"
 ```
 
-Para la demostracion se debe utilizar una clave valida habilitada para las APIs requeridas por el equipo y restringida segun las recomendaciones de Google Cloud.
+Para la demostracion se debe utilizar una clave valida habilitada para las APIs requeridas por el equipo y restringida segun las recomendaciones de Google Cloud. La integracion fue probada utilizando la clave como variable de entorno, sin exponerla en el repositorio.
 
 ## Ejecucion Local
 
@@ -217,4 +221,71 @@ La API quedara disponible en:
 ```text
 http://localhost:8080
 ```
+
+Las credenciales mostradas corresponden al entorno local de demostracion. Las claves y contrasenas del despliegue se configuran como secretos y no se almacenan en el repositorio.
+
+## Pruebas Automatizadas
+
+La aplicacion cuenta con pruebas de repositorios, servicios, controladores, seguridad JWT, reglas del flujo de solicitudes e integracion con Google Maps. Las pruebas de persistencia utilizan PostgreSQL con Testcontainers, por lo que Docker debe estar activo.
+
+```powershell
+.\mvnw.cmd test
+```
+
+En la revision funcional previa al despliegue se obtuvo:
+
+```text
+Tests run: 200, Failures: 0, Errors: 0, Skipped: 0
+BUILD SUCCESS
+```
+
+## Pruebas Con Postman
+
+El archivo `postman_collection.json` contiene una coleccion lista para importar en Postman. La variable `baseUrl` permite probar el mismo flujo en local o contra el servicio desplegado.
+
+Para ejecutar el recorrido principal:
+
+1. Registrar al conductor y al pasajero con correos `@utec.edu.pe`.
+2. Iniciar sesion con ambos usuarios y obtener sus tokens JWT.
+3. Registrar el vehiculo del conductor.
+4. Crear una publicacion como conductor.
+5. Enviar una solicitud como pasajero.
+6. Aceptar la solicitud desde la cuenta del conductor.
+7. Consultar el viaje y sus pasajeros confirmados.
+8. Registrar una review despues de la fecha del viaje.
+9. Consultar el rating actualizado desde el perfil.
+10. Ejecutar los controles de seguridad para verificar respuestas `401` y el bloqueo de creacion manual de viajes.
+
+Para probar AWS, la variable de la coleccion debe quedar asi cuando se disponga de la URL final:
+
+```text
+baseUrl = [Agregar URL publica de AWS]
+```
+
+## Despliegue En AWS Academy
+
+El despliegue de entrega se realizara en la cuenta AWS Academy Learner Lab del equipo. El repositorio contiene el workflow para construir la imagen Docker, publicarla en Amazon ECR y actualizar la definicion de tarea ejecutada en Amazon ECS.
+
+| Recurso | Configuracion |
+| --- | --- |
+| Entorno de entrega | AWS Academy Learner Lab |
+| Region AWS | [Completar segun restriccion del laboratorio] |
+| Amazon ECR | `carpultec-api` |
+| Cluster ECS | `carpultec-api` |
+| Servicio ECS | `backend-task` |
+| Base de datos RDS | `carpultec` |
+| URL publica de la API | [Agregar URL publica de AWS] |
+
+Las credenciales de base de datos se proporcionaran al contenedor mediante parametros seguros de AWS. La clave JWT y la clave de Google Maps se configuraran de igual manera, sin subir secretos al repositorio.
+
+## Evidencias Para Presentacion
+
+| Evidencia | Referencia |
+| --- | --- |
+| Flujo funcional en Postman local | [Agregar captura o enlace] |
+| Flujo funcional consumiendo AWS Academy | [Agregar captura o enlace] |
+| Pipeline GitHub Actions de AWS Academy | [Agregar enlace] |
+| Servicio ECS ejecutandose en Learner Lab | [Agregar captura o enlace] |
+| Base de datos RDS configurada en Learner Lab | [Agregar captura o enlace] |
+| Diagrama entidad-relacion | [Agregar archivo o enlace] |
 
