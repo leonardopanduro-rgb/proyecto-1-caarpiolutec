@@ -274,14 +274,3 @@ El despliegue de entrega se realizara en la cuenta AWS Academy Learner Lab del e
 
 Las credenciales de base de datos se proporcionaran al contenedor mediante parametros seguros de AWS. La clave JWT y la clave de Google Maps se configuraran de igual manera, sin subir secretos al repositorio.
 
-## Evidencias Para Presentacion
-
-| Evidencia | Referencia |
-| --- | --- |
-| Flujo funcional en Postman local | Por adjuntar |
-| Flujo funcional consumiendo AWS Academy | Por adjuntar al obtener la URL publica |
-| Pipeline GitHub Actions de AWS Academy | Por adjuntar al ejecutar el despliegue |
-| Servicio ECS ejecutandose en Learner Lab | Por adjuntar al ejecutar el despliegue |
-| Base de datos RDS configurada en Learner Lab | Por adjuntar al ejecutar el despliegue |
-| Diagrama entidad-relacion | Por adjuntar |
-
