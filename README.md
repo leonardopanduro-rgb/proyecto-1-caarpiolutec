@@ -72,7 +72,20 @@ El viaje no se crea manualmente desde un formulario publico. Su creacion se prod
 | `RidePassenger` | Relacion entre el viaje confirmado y el pasajero participante. |
 | `Review` | Calificacion realizada entre participantes de un viaje concluido. |
 
-Las entidades se relacionan mediante JPA para conservar la trazabilidad del flujo: usuario, vehiculo, publicacion, solicitud, viaje y review.
+Las entidades se relacionan mediante JPA para conservar la trazabilidad del flujo.
+
+```mermaid
+erDiagram
+    USER ||--o{ VEHICLE : owns
+    USER ||--o{ PUBLICATION : creates
+    PUBLICATION ||--o{ REQUEST_PUBLICATION : receives
+    USER ||--o{ REQUEST_PUBLICATION : requests
+    REQUEST_PUBLICATION ||--o| RIDE : confirms
+    RIDE ||--o{ RIDE_PASSENGER : includes
+    USER ||--o{ RIDE_PASSENGER : travels
+    RIDE ||--o{ REVIEW : enables
+    USER ||--o{ REVIEW : writes
+```
 
 ## Reglas De Negocio
 
@@ -83,7 +96,7 @@ Las entidades se relacionan mediante JPA para conservar la trazabilidad del fluj
 - La autenticacion genera access token y refresh token.
 - Los roles del sistema son `USER` y `ADMIN`.
 - Ser conductor o pasajero depende de cada viaje y no de un rol permanente.
-- Para crear recursos sensibles, el backend obtiene al usuario desde el JWT y no confia en identificadores enviados desde el body.
+- Los recursos sensibles se asocian al usuario obtenido desde el JWT.
 
 ### Vehiculos Y Publicaciones
 
@@ -99,14 +112,12 @@ Las entidades se relacionan mediante JPA para conservar la trazabilidad del fluj
 - Una solicitud debe tener el sentido opuesto al de la publicacion original.
 - El conductor que responde a una publicacion debe contar con vehiculo valido.
 - Solo se pueden aceptar, rechazar o cancelar solicitudes que se encuentren pendientes.
-- El solicitante puede cancelar su solicitud y el autor de la publicacion puede aceptar o rechazar solicitudes recibidas.
-- Al aceptar se verifican nuevamente los cupos disponibles y la capacidad del vehiculo, evitando confirmar viajes incompatibles.
+- El solicitante puede cancelar y el autor de la publicacion puede aceptar o rechazar.
+- Al aceptar se verifican nuevamente cupos y capacidad del vehiculo.
 
 ### Reviews Y Rating
 
-- Una review solo puede ser registrada por un usuario autenticado que participo en el viaje.
-- No se permite calificarse a uno mismo ni calificar a una persona ajena al viaje.
-- No se permite registrar dos veces la misma calificacion para el mismo viaje y participante.
+- Solo un participante autenticado puede registrar una review de otro participante, una vez por viaje.
 - El rating mostrado para un usuario se obtiene de sus reviews y no es un valor que el usuario pueda asignarse directamente.
 
 ## Arquitectura Del Backend
@@ -119,13 +130,7 @@ controller -> service -> repository -> model
                      -> exception
 ```
 
-- `controller`: expone los endpoints HTTP y recibe las solicitudes.
-- `service`: concentra la logica del flujo de carpool y sus validaciones.
-- `repository`: realiza la persistencia mediante Spring Data JPA.
-- `model`: contiene las entidades del dominio.
-- `dto`: define los objetos de entrada y respuesta expuestos por la API.
-- `exception`: centraliza errores de negocio y respuestas consistentes.
-- `security`: configura autenticacion JWT y acceso a rutas protegidas.
+Los controladores reciben solicitudes, los servicios aplican reglas de negocio, los repositorios persisten mediante JPA y los paquetes `dto`, `exception` y `security` mantienen los contratos HTTP, errores y autenticacion.
 
 ## Tecnologias Utilizadas
 
@@ -173,7 +178,7 @@ La aplicacion incluye un servicio para obtener informacion geografica necesaria 
 $env:GOOGLE_MAPS_API_KEY="TU_CLAVE_DE_GOOGLE_MAPS"
 ```
 
-Para la demostracion se debe utilizar una clave valida habilitada para las APIs requeridas por el equipo y restringida segun las recomendaciones de Google Cloud. La integracion fue probada utilizando la clave como variable de entorno, sin exponerla en el repositorio.
+Para la demostracion se utiliza una clave configurada como secreto, habilitada para Geocoding API y Distance Matrix API.
 
 ## Ejecucion Local
 
@@ -186,7 +191,7 @@ Para la demostracion se debe utilizar una clave valida habilitada para las APIs 
 
 ### 1. Preparar Variables Locales
 
-El repositorio incluye el archivo `.env.example` como referencia de configuracion. Para la ejecucion local se debe crear una copia privada y reemplazar los valores de ejemplo. El archivo `.env` no se versiona.
+El archivo `.env.example` es la referencia local; su copia `.env` no se versiona.
 
 ```powershell
 Copy-Item .env.example .env
@@ -206,8 +211,6 @@ GOOGLE_MAPS_API_KEY=<CLAVE_LOCAL_DE_GOOGLE_MAPS>
 CORS_ORIGINS=http://localhost:3000,http://localhost:5173
 ```
 
-Los valores indicados entre `< >` deben configurarse unicamente en el equipo del desarrollador o como secretos en el entorno de despliegue.
-
 ### 2. Ejecutar La Aplicacion Con Docker
 
 ```powershell
@@ -220,7 +223,7 @@ Docker Compose inicia PostgreSQL y el backend. La API queda disponible en:
 http://localhost:8080
 ```
 
-Si el puerto local de PostgreSQL ya esta ocupado, se puede ajustar el puerto publicado en `docker-compose.yml` para la prueba local. Las contrasenas, tokens y claves de APIs no deben almacenarse en el repositorio.
+Las contrasenas, tokens y claves de APIs no deben almacenarse en el repositorio.
 
 ## Pruebas Automatizadas
 
@@ -273,6 +276,9 @@ El despliegue de entrega se realizo en AWS Academy Learner Lab. El primer despli
 | Servicio ECS | `carpultec-service` |
 | Base de datos RDS | `carpultec-db` |
 | URL publica de la API | `http://carpultec-alb-1825260446.us-east-1.elb.amazonaws.com` |
+| CI/CD verificado | [Deploy to AWS Academy ECS #1 - Success](https://github.com/CS2031-DBP/proyecto-1-caarpiolutec/actions/runs/26484915369) |
 
 Las credenciales de base de datos, la clave JWT y las configuraciones privadas de integracion se proporcionan al contenedor mediante parametros seguros de AWS. El balanceador consulta `/actuator/health` para confirmar que la aplicacion inicio correctamente antes de dirigir trafico. El target group se valido en estado `healthy` con el backend accesible desde la URL publica.
+
+El workflow de GitHub Actions ejecuto pruebas, construyo la imagen Docker, publico la nueva version en ECR y actualizo el servicio ECS correctamente. La ejecucion fue disparada manualmente debido al uso de credenciales temporales de AWS Academy.
 
