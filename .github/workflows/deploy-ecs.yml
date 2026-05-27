@@ -16,7 +16,7 @@ jobs:
     name: Build, Test and Deploy
     runs-on: ubuntu-latest
     environment: production
-    timeout-minutes: 20
+    timeout-minutes: 30
 
     steps:
       - name: Checkout code
@@ -41,46 +41,31 @@ jobs:
           aws-region: ${{ env.AWS_REGION }}
 
       - name: Validate deploy configuration
-        env:
-          DB_URL: ${{ secrets.DB_URL }}
-          DB_USERNAME: ${{ secrets.DB_USERNAME }}
-          DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
-          APP_JWT_SECRET: ${{ secrets.APP_JWT_SECRET }}
-          GOOGLE_MAPS_API_KEY: ${{ secrets.GOOGLE_MAPS_API_KEY }}
-          CORS_ORIGINS: ${{ secrets.CORS_ORIGINS }}
         run: |
-          for name in AWS_REGION ECS_CLUSTER ECS_SERVICE DB_URL DB_USERNAME DB_PASSWORD APP_JWT_SECRET GOOGLE_MAPS_API_KEY CORS_ORIGINS; do
+          for name in AWS_REGION ECS_CLUSTER ECS_SERVICE; do
             if [ -z "${!name}" ]; then
               echo "::error::Falta configurar el secret $name en GitHub Actions."
               exit 1
             fi
           done
 
-      - name: Sync application parameters to SSM
-        env:
-          DB_URL: ${{ secrets.DB_URL }}
-          DB_USERNAME: ${{ secrets.DB_USERNAME }}
-          DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
-          APP_JWT_SECRET: ${{ secrets.APP_JWT_SECRET }}
-          GOOGLE_MAPS_API_KEY: ${{ secrets.GOOGLE_MAPS_API_KEY }}
-          CORS_ORIGINS: ${{ secrets.CORS_ORIGINS }}
+      - name: Verify existing application parameters in SSM
         run: |
-          put_parameter() {
-            aws ssm put-parameter \
-              --name "$1" \
-              --value "$2" \
-              --type SecureString \
-              --overwrite \
+          for parameter in \
+            "/carpultec/prod/spring-datasource-url" \
+            "/carpultec/prod/spring-datasource-username" \
+            "/carpultec/prod/spring-datasource-password" \
+            "/carpultec/prod/app-jwt-secret" \
+            "/carpultec/prod/google-maps-api-key" \
+            "/carpultec/prod/cors-origins"; do
+            if ! aws ssm get-parameter \
+              --name "$parameter" \
               --region "$AWS_REGION" \
-              --no-cli-pager > /dev/null
-          }
-
-          put_parameter "/carpultec/prod/spring-datasource-url" "$DB_URL"
-          put_parameter "/carpultec/prod/spring-datasource-username" "$DB_USERNAME"
-          put_parameter "/carpultec/prod/spring-datasource-password" "$DB_PASSWORD"
-          put_parameter "/carpultec/prod/app-jwt-secret" "$APP_JWT_SECRET"
-          put_parameter "/carpultec/prod/google-maps-api-key" "$GOOGLE_MAPS_API_KEY"
-          put_parameter "/carpultec/prod/cors-origins" "$CORS_ORIGINS"
+              --no-cli-pager > /dev/null; then
+              echo "::error::Falta el parametro SSM $parameter en AWS."
+              exit 1
+            fi
+          done
 
       - name: Login to Amazon ECR
         id: login-ecr

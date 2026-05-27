@@ -67,7 +67,7 @@ aws ssm put-parameter --name /carpultec/prod/google-maps-api-key --type SecureSt
 aws ssm put-parameter --name /carpultec/prod/cors-origins --type String --value "http://localhost:3000,http://localhost:5173" --overwrite --region <AWS_REGION>
 ```
 
-Despues del arranque inicial, el workflow vuelve a sincronizar estos seis parametros desde GitHub Secrets antes de cada deploy. De esa forma no es necesario editar el task definition para cambiar passwords o claves.
+Despues del arranque inicial, el workflow verifica que estos seis parametros existan antes de cada deploy, pero no modifica sus valores. Asi se evita reemplazar accidentalmente el password de RDS, la firma JWT o una clave externa durante un redeploy.
 
 ## 4. Crear Log Group
 
@@ -98,8 +98,8 @@ Desde la consola de AWS crea:
 | Campo | Valor |
 | --- | --- |
 | Launch type | Fargate |
-| Cluster | `carpultec-api` |
-| Service | `backend-task` |
+| Cluster | `carpultec-cluster` |
+| Service | `carpultec-service` |
 | Task family | `backend-task` |
 | Container port | `8080` |
 | Desired tasks | `1` |
@@ -127,24 +127,17 @@ AWS_SESSION_TOKEN
 AWS_REGION
 ECS_CLUSTER
 ECS_SERVICE
-DB_URL
-DB_USERNAME
-DB_PASSWORD
-APP_JWT_SECRET
-GOOGLE_MAPS_API_KEY
-CORS_ORIGINS
 ```
 
 Valores de identificacion esperados:
 
 ```text
-ECS_CLUSTER=carpultec-api
-ECS_SERVICE=backend-task
-DB_URL=jdbc:postgresql://<RDS_ENDPOINT>:5432/carpultec
-CORS_ORIGINS=http://localhost:3000,http://localhost:5173
+AWS_REGION=us-east-1
+ECS_CLUSTER=carpultec-cluster
+ECS_SERVICE=carpultec-service
 ```
 
-Los tres valores de credenciales se obtienen desde `AWS Details` en cada sesion del Learner Lab. Si la sesion expira, deben actualizarse antes de ejecutar el workflow nuevamente.
+Los tres valores de credenciales se obtienen desde `AWS Details` en cada sesion del Learner Lab. Si la sesion expira, deben actualizarse antes de ejecutar el workflow nuevamente. Las variables sensibles de la aplicacion permanecen en AWS SSM Parameter Store y no se copian a GitHub Secrets.
 
 ## 8. Ejecutar El Deploy
 
@@ -154,7 +147,7 @@ El pipeline:
 
 1. Ejecuta `./mvnw -B test`.
 2. Valida que esten definidos los Secrets necesarios.
-3. Sincroniza credenciales de aplicacion hacia SSM Parameter Store.
+3. Comprueba que los parametros privados de la aplicacion existan en SSM Parameter Store.
 4. Construye la imagen Docker.
 5. Publica la imagen en Amazon ECR.
 6. Aplica automaticamente la cuenta y region del Learner Lab a la task definition.
@@ -169,7 +162,7 @@ Al completar la ejecucion, registra en el README el enlace al workflow exitoso y
 2. Crear RDS, ECR, log group, security groups, ALB y target group en la misma region.
 3. Subir la imagen `bootstrap`, registrar una task definition inicial y crear el service ECS.
 4. Confirmar que el target group usa `/actuator/health` y que RDS solo acepta trafico desde ECS.
-5. Cargar los doce Secrets listados en GitHub Actions.
+5. Cargar los seis Secrets listados en GitHub Actions.
 6. Abrir `Actions -> Deploy to AWS Academy ECS -> Run workflow` seleccionando la rama que contiene este cambio.
 7. Verificar que el workflow finalice correctamente y probar `http://<ALB_DNS>/actuator/health`.
 8. Colocar el DNS de la API en `baseUrl` de Postman y ejecutar el flujo funcional.

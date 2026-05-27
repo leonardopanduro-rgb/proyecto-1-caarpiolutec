@@ -257,22 +257,22 @@ Para ejecutar el recorrido principal:
 Para probar AWS, la variable de la coleccion debe quedar asi cuando se disponga de la URL final:
 
 ```text
-baseUrl = <URL_PUBLICA_DE_AWS_ACADEMY>
+baseUrl = http://carpultec-alb-1825260446.us-east-1.elb.amazonaws.com
 ```
 
 ## Despliegue En AWS Academy
 
-El despliegue de entrega se realizara en la cuenta AWS Academy Learner Lab del equipo. El repositorio contiene el workflow para construir la imagen Docker, publicarla en Amazon ECR y actualizar la definicion de tarea ejecutada en Amazon ECS.
+El despliegue de entrega se realizo en AWS Academy Learner Lab. El primer despliegue se configuro manualmente para validar los recursos iniciales y la conectividad entre el balanceador, ECS Fargate y RDS. El repositorio incluye un workflow manual para construir una nueva imagen Docker, publicarla en Amazon ECR y actualizar la tarea de Amazon ECS sin sobrescribir las variables sensibles almacenadas en Parameter Store.
 
 | Recurso | Configuracion |
 | --- | --- |
 | Entorno de entrega | AWS Academy Learner Lab |
-| Region AWS | Por registrar segun restriccion del laboratorio |
+| Region AWS | `us-east-1` |
 | Amazon ECR | `carpultec-api` |
-| Cluster ECS | `carpultec-api` |
-| Servicio ECS | `backend-task` |
-| Base de datos RDS | `carpultec` |
-| URL publica de la API | Por registrar al finalizar el despliegue |
+| Cluster ECS | `carpultec-cluster` |
+| Servicio ECS | `carpultec-service` |
+| Base de datos RDS | `carpultec-db` |
+| URL publica de la API | `http://carpultec-alb-1825260446.us-east-1.elb.amazonaws.com` |
 
-Las credenciales de base de datos se proporcionaran al contenedor mediante parametros seguros de AWS. La clave JWT y la clave de Google Maps se configuraran de igual manera, sin subir secretos al repositorio. El balanceador consultara `/actuator/health` para confirmar que la aplicacion inicio correctamente antes de dirigir trafico.
+Las credenciales de base de datos, la clave JWT y las configuraciones privadas de integracion se proporcionan al contenedor mediante parametros seguros de AWS. El balanceador consulta `/actuator/health` para confirmar que la aplicacion inicio correctamente antes de dirigir trafico. El target group se valido en estado `healthy` con el backend accesible desde la URL publica.
 

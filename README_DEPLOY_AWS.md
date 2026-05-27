@@ -66,19 +66,19 @@ CORS_ORIGINS=<origenes-permitidos>
 JAVA_OPTS=-XX:MaxRAMPercentage=75
 ```
 
-La task definition obtiene los valores sensibles desde SSM Parameter Store. El workflow sincroniza esos parametros usando los Secrets configurados en GitHub Actions: `DB_URL`, `DB_USERNAME`, `DB_PASSWORD`, `APP_JWT_SECRET`, `GOOGLE_MAPS_API_KEY` y `CORS_ORIGINS`.
+La task definition obtiene los valores sensibles desde SSM Parameter Store. Estos parametros se cargan durante la configuracion inicial de AWS y el workflow de redeploy solo verifica que existan; no reemplaza passwords, claves JWT ni claves externas que ya se encuentren funcionando en el servicio.
 
 ## Recursos De La Entrega En Learner Lab
 
 | Recurso | Configuracion |
 | --- | --- |
 | Entorno | AWS Academy Learner Lab |
-| Region | Por registrar segun restriccion del laboratorio |
+| Region | `us-east-1` |
 | Repositorio ECR | `carpultec-api` |
-| Cluster ECS | `carpultec-api` |
-| Servicio ECS | `backend-task` |
-| Base de datos RDS | `carpultec` |
-| URL publica | Por registrar al finalizar el despliegue |
+| Cluster ECS | `carpultec-cluster` |
+| Servicio ECS | `carpultec-service` |
+| Base de datos RDS | `carpultec-db` |
+| URL publica | `http://carpultec-alb-1825260446.us-east-1.elb.amazonaws.com` |
 
 ## Despliegue Con GitHub Actions Y ECS
 
@@ -87,4 +87,4 @@ Para ejecutar el despliegue controlado en ECS Fargate, revisa [AWS_CICD_GUIDE.md
 - `.github/workflows/deploy-ecs.yml`
 - `aws/ecs-task-definition.json`
 
-El workflow se mantiene en ejecucion manual mientras se configuran los recursos y credenciales temporales del Learner Lab. La primera creacion del servicio ECS requiere una imagen inicial y la task definition registrada; los despliegues posteriores se ejecutan desde Actions. El enlace de la ejecucion exitosa se incorporara como evidencia al finalizar el despliegue.
+El workflow se mantiene en ejecucion manual porque las credenciales del Learner Lab son temporales. El primer despliegue fue creado y comprobado manualmente; los despliegues posteriores pueden ejecutarse desde Actions reutilizando los parametros privados existentes en AWS Parameter Store.
