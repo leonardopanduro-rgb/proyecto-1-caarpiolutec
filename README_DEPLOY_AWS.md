@@ -79,7 +79,7 @@ La task definition obtiene los valores sensibles desde SSM Parameter Store. Esto
 | Servicio ECS | `carpultec-service` |
 | Base de datos RDS | `carpultec-db` |
 | URL publica | `http://carpultec-alb-1825260446.us-east-1.elb.amazonaws.com` |
-| GitHub Actions | [Ejecucion #1 exitosa](https://github.com/CS2031-DBP/proyecto-1-caarpiolutec/actions/runs/26484915369) |
+| GitHub Actions | Workflow manual `Deploy to AWS Academy ECS` disponible en `main` |
 
 ## Despliegue Con GitHub Actions Y ECS
 

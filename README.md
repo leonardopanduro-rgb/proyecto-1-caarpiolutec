@@ -26,22 +26,13 @@ API REST para coordinar viajes compartidos entre estudiantes de la Universidad d
 
 ## Problema Que Atiende
 
-El transporte hacia la universidad puede ser costoso o poco practico, especialmente en horarios de alta demanda. Al mismo tiempo, algunos estudiantes llegan en auto y pueden disponer de asientos libres. Carpool UTEC propone un canal organizado para vincular ambos casos dentro de una comunidad universitaria identificable mediante su correo institucional.
+El transporte hacia la universidad puede ser costoso o poco practico. Algunos estudiantes llegan en auto con asientos libres; Carpool UTEC vincula ambos casos dentro de una comunidad identificada mediante correo institucional.
 
 La aplicacion no considera que un estudiante sea siempre conductor o siempre pasajero. Un mismo usuario puede ofrecer un viaje en una ocasion y solicitar movilidad en otra, dependiendo de su necesidad y de si dispone de un vehiculo registrado.
 
 ## Funcionalidades Principales
 
-- Registro de estudiantes utilizando correo institucional `@utec.edu.pe`.
-- Inicio de sesion mediante JWT y refresh token.
-- Registro de vehiculos propios para usuarios que desean conducir.
-- Creacion de publicaciones para ofrecer asientos o buscar un conductor.
-- Solicitudes entre usuarios con validacion del tipo de publicacion.
-- Confirmacion de solicitudes y generacion del viaje correspondiente.
-- Registro de pasajeros confirmados dentro del viaje.
-- Calificaciones entre participantes luego de un viaje.
-- Consulta de rutas y ubicaciones mediante integracion configurable con Google Maps.
-- Notificaciones asociadas al registro y a cambios relevantes de solicitudes.
+La API permite registro y login JWT, vehiculos propios, publicaciones, solicitudes, aceptacion que genera viajes, reviews entre participantes e integracion geografica con Google Maps. Ademas, notifica el registro y cambios de solicitudes.
 
 ## Flujo Principal Del Sistema
 
@@ -55,10 +46,9 @@ La aplicacion no considera que un estudiante sea siempre conductor o siempre pas
    - Una publicacion de pasajero recibe solicitudes de conductores.
 5. El autor de la publicacion revisa sus solicitudes recibidas y acepta o rechaza una solicitud pendiente.
 6. Al aceptar, el backend identifica al conductor, al pasajero y al vehiculo correspondiente, y crea el viaje confirmado.
-7. Los participantes pueden consultar el viaje generado.
-8. Una vez realizado el viaje, los participantes pueden registrar una calificacion sobre la otra persona.
+7. Los participantes consultan el viaje y luego pueden registrar una calificacion.
 
-El viaje no se crea manualmente desde un formulario publico. Su creacion se produce a partir de una solicitud aceptada, de forma que siempre exista relacion entre publicacion, solicitud y participantes.
+El viaje se crea desde una solicitud aceptada, manteniendo la relacion entre publicacion, solicitud y participantes.
 
 ## Modelo De Datos
 
@@ -122,15 +112,26 @@ erDiagram
 
 ## Arquitectura Del Backend
 
-El backend esta organizado en capas con responsabilidades separadas:
+El backend mantiene una arquitectura por capas sencilla, apropiada para el alcance del curso. Una peticion protegida atraviesa primero el filtro JWT; luego el controlador recibe DTOs y delega la operacion al servicio. La logica de carpool vive en servicios, no en controladores: por ejemplo, `RequestPublicationService` valida ownership, tipo conductor/pasajero, cupos y genera `Ride` al aceptar una solicitud.
 
 ```text
-controller -> service -> repository -> model
-                     -> dto
-                     -> exception
+Cliente HTTP
+   -> SecurityConfig / JwtAuthenticationFilter
+   -> Controller (rutas, DTOs y @Valid)
+   -> Service (reglas, ownership y eventos)
+   -> Repository (Spring Data JPA)
+   -> Model (entidades PostgreSQL)
 ```
 
-Los controladores reciben solicitudes, los servicios aplican reglas de negocio, los repositorios persisten mediante JPA y los paquetes `dto`, `exception` y `security` mantienen los contratos HTTP, errores y autenticacion.
+| Capa o paquete | Clases representativas | Responsabilidad |
+| --- | --- | --- |
+| `controller` | `AuthController`, `PublicationController`, `RequestPublicationController` | Expone rutas HTTP y entrega respuestas DTO. |
+| `service` | `AuthService`, `PublicationService`, `RequestPublicationService`, `ReviewService` | Aplica reglas, permisos del usuario autenticado y creacion del viaje. |
+| `repository` | `UserRepository`, `PublicationRepository`, `RideRepository` | Consulta y persiste entidades mediante JPA. |
+| `model` | `User`, `Vehicle`, `Publication`, `RequestPublication`, `Ride`, `Review` | Representa los datos y relaciones del dominio. |
+| `security` | `JwtAuthenticationFilter`, `JwtService`, `SecurityConfig` | Autentica tokens y protege endpoints sensibles. |
+| `exception` y `dto` | `RestExceptionHandler`, `ErrorResponseDto` | Define validaciones y errores HTTP consistentes. |
+| `event` y `listener` | `UserRegisteredEvent`, `RequestStatusChangedListener` | Procesa notificaciones asincronas sin mezclar correo con el flujo principal. |
 
 ## Tecnologias Utilizadas
 
@@ -172,13 +173,13 @@ Las rutas de viajes y pasajeros se utilizan para consulta del flujo confirmado. 
 
 ## Integracion Con Google Maps
 
-La aplicacion incluye un servicio para obtener informacion geografica necesaria para las publicaciones y los viajes. La clave de Google Maps se configura mediante variable de entorno para evitar que una credencial privada sea almacenada en el repositorio.
+La aplicacion obtiene coordenadas y distancias para publicaciones y viajes. La clave se configura por variable de entorno.
 
 ```powershell
 $env:GOOGLE_MAPS_API_KEY="TU_CLAVE_DE_GOOGLE_MAPS"
 ```
 
-Para la demostracion se utiliza una clave configurada como secreto, habilitada para Geocoding API y Distance Matrix API.
+En el deploy se habilitan Geocoding API y Distance Matrix API mediante un secreto.
 
 ## Ejecucion Local
 
@@ -227,7 +228,7 @@ Las contrasenas, tokens y claves de APIs no deben almacenarse en el repositorio.
 
 ## Pruebas Automatizadas
 
-La aplicacion cuenta con pruebas de repositorios, servicios, controladores, seguridad JWT, reglas del flujo de solicitudes e integracion con Google Maps. Las pruebas de persistencia utilizan PostgreSQL con Testcontainers, por lo que Docker debe estar activo.
+Las pruebas cubren repositorios, servicios, controladores, seguridad y Google Maps. Persistencia utiliza PostgreSQL con Testcontainers, por lo que Docker debe estar activo.
 
 ```powershell
 .\mvnw.cmd test
@@ -242,7 +243,7 @@ BUILD SUCCESS
 
 ## Pruebas Con Postman
 
-El archivo `postman_collection.json` contiene una coleccion lista para importar en Postman. La variable `baseUrl` permite probar el mismo flujo en local o contra el servicio desplegado.
+`postman_collection.json` se importa en Postman y su variable `baseUrl` permite probar localmente o contra AWS.
 
 Para ejecutar el recorrido principal:
 
@@ -252,10 +253,8 @@ Para ejecutar el recorrido principal:
 4. Crear una publicacion como conductor.
 5. Enviar una solicitud como pasajero.
 6. Aceptar la solicitud desde la cuenta del conductor.
-7. Consultar el viaje y sus pasajeros confirmados.
-8. Registrar una review despues de la fecha del viaje.
-9. Consultar el rating actualizado desde el perfil.
-10. Ejecutar los controles de seguridad para verificar respuestas `401` y el bloqueo de creacion manual de viajes.
+7. Consultar el viaje, registrar una review y verificar el rating.
+8. Ejecutar controles de seguridad para respuestas `401` y bloqueo de creacion manual de viajes.
 
 Para probar AWS, la variable de la coleccion debe quedar asi cuando se disponga de la URL final:
 
@@ -276,9 +275,9 @@ El despliegue de entrega se realizo en AWS Academy Learner Lab. El primer despli
 | Servicio ECS | `carpultec-service` |
 | Base de datos RDS | `carpultec-db` |
 | URL publica de la API | `http://carpultec-alb-1825260446.us-east-1.elb.amazonaws.com` |
-| CI/CD verificado | [Deploy to AWS Academy ECS #1 - Success](https://github.com/CS2031-DBP/proyecto-1-caarpiolutec/actions/runs/26484915369) |
+| CI/CD | Workflow manual `Deploy to AWS Academy ECS` disponible desde `main` |
 
 Las credenciales de base de datos, la clave JWT y las configuraciones privadas de integracion se proporcionan al contenedor mediante parametros seguros de AWS. El balanceador consulta `/actuator/health` para confirmar que la aplicacion inicio correctamente antes de dirigir trafico. El target group se valido en estado `healthy` con el backend accesible desde la URL publica.
 
-El workflow de GitHub Actions ejecuto pruebas, construyo la imagen Docker, publico la nueva version en ECR y actualizo el servicio ECS correctamente. La ejecucion fue disparada manualmente debido al uso de credenciales temporales de AWS Academy.
+El workflow de GitHub Actions fue validado para ejecutar pruebas, construir la imagen Docker, publicarla en ECR y actualizar ECS. Se ejecuta manualmente debido al uso de credenciales temporales de AWS Academy.
 
