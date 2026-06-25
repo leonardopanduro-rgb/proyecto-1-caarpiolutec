@@ -1,5 +1,6 @@
 package com.dbp.democarpultec.service;
 
+import com.dbp.democarpultec.service.impl.GoogleMapsServiceImpl;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.http.MediaType;
@@ -20,7 +21,7 @@ class GoogleMapsServiceTest {
     void setUp() {
         RestClient.Builder builder = RestClient.builder();
         server = MockRestServiceServer.bindTo(builder).build();
-        googleMapsService = new GoogleMapsService(
+        googleMapsService = new GoogleMapsServiceImpl(
                 builder,
                 "test-key",
                 "https://maps.googleapis.com/maps/api"
@@ -72,7 +73,7 @@ class GoogleMapsServiceTest {
     void shouldNotRequestGoogleWhenApiKeyIsMissing() {
         RestClient.Builder builder = RestClient.builder();
         MockRestServiceServer emptyKeyServer = MockRestServiceServer.bindTo(builder).build();
-        GoogleMapsService serviceWithoutKey = new GoogleMapsService(
+        GoogleMapsService serviceWithoutKey = new GoogleMapsServiceImpl(
                 builder,
                 "",
                 "https://maps.googleapis.com/maps/api"

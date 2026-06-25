@@ -3,67 +3,19 @@ package com.dbp.democarpultec.service;
 import com.dbp.democarpultec.dto.RidePassengerRequestDto;
 import com.dbp.democarpultec.dto.RidePassengerResponseDto;
 import com.dbp.democarpultec.model.RidePassenger;
-import com.dbp.democarpultec.repository.RidePassengerRepository;
-import jakarta.persistence.EntityNotFoundException;
-import lombok.RequiredArgsConstructor;
-import org.springframework.stereotype.Service;
 
 import java.util.List;
 
-@Service
-@RequiredArgsConstructor
-public class RidePassengerService {
+public interface RidePassengerService {
+    List<RidePassengerResponseDto> findAll();
 
-    private final RidePassengerRepository ridePassengerRepository;
-    private final UserService userService;
-    private final RideService rideService;
+    RidePassengerResponseDto findById(Long id);
 
-    public List<RidePassengerResponseDto> findAll() {
-        return ridePassengerRepository.findAll().stream().map(this::toResponseDto).toList();
-    }
+    RidePassengerResponseDto create(RidePassengerRequestDto dto);
 
-    public RidePassengerResponseDto findById(Long id) {
-        return toResponseDto(findEntityById(id));
-    }
+    RidePassengerResponseDto update(Long id, RidePassengerRequestDto dto);
 
-    public RidePassengerResponseDto create(RidePassengerRequestDto dto) {
-        RidePassenger passenger = new RidePassenger();
-        updateEntity(passenger, dto);
-        return toResponseDto(ridePassengerRepository.save(passenger));
-    }
+    void delete(Long id);
 
-    public RidePassengerResponseDto update(Long id, RidePassengerRequestDto dto) {
-        RidePassenger passenger = findEntityById(id);
-        updateEntity(passenger, dto);
-        return toResponseDto(ridePassengerRepository.save(passenger));
-    }
-
-    public void delete(Long id) {
-        if (!ridePassengerRepository.existsById(id)) {
-            throw new EntityNotFoundException("RidePassenger not found with id " + id);
-        }
-        ridePassengerRepository.deleteById(id);
-    }
-
-    public RidePassenger findEntityById(Long id) {
-        return ridePassengerRepository.findById(id)
-                .orElseThrow(() -> new EntityNotFoundException("RidePassenger not found with id " + id));
-    }
-
-    private void updateEntity(RidePassenger passenger, RidePassengerRequestDto dto) {
-        passenger.setPassenger(userService.findEntityById(dto.getPassengerId()));
-        passenger.setRide(rideService.findEntityById(dto.getRideId()));
-        passenger.setSeatsReserved(dto.getSeatsReserved());
-        passenger.setPickupPoint(dto.getPickupPoint());
-    }
-
-    private RidePassengerResponseDto toResponseDto(RidePassenger passenger) {
-        return RidePassengerResponseDto.builder()
-                .id(passenger.getId())
-                .passengerId(passenger.getPassenger().getId())
-                .rideId(passenger.getRide().getId())
-                .seatsReserved(passenger.getSeatsReserved())
-                .pickupPoint(passenger.getPickupPoint())
-                .build();
-    }
+    RidePassenger findEntityById(Long id);
 }

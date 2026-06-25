@@ -8,6 +8,7 @@ import com.dbp.democarpultec.model.Publication;
 import com.dbp.democarpultec.model.User;
 import com.dbp.democarpultec.model.Vehicle;
 import com.dbp.democarpultec.repository.PublicationRepository;
+import com.dbp.democarpultec.service.impl.PublicationServiceImpl;
 import jakarta.persistence.EntityNotFoundException;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -32,7 +33,7 @@ public class PublicationServiceTest {
     @Mock
     private VehicleService vehicleService;
     @InjectMocks
-    private PublicationService publicationService;
+    private PublicationServiceImpl publicationService;
 
     @Test
     void shouldCreateDriverPublicationWithOwnedVehicle() {

@@ -47,7 +47,7 @@ class AuthControllerTest {
 
         when(authService.register(any(AuthRegisterRequestDto.class))).thenReturn(buildAuthResponse());
 
-        mockMvc.perform(post("/api/auth/register")
+        mockMvc.perform(post("/api/v1/auth/register")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isCreated())
@@ -68,7 +68,7 @@ class AuthControllerTest {
 
         when(authService.login(any(AuthLoginRequestDto.class))).thenReturn(buildAuthResponse());
 
-        mockMvc.perform(post("/api/auth/login")
+        mockMvc.perform(post("/api/v1/auth/login")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isOk())
@@ -87,7 +87,7 @@ class AuthControllerTest {
 
         when(authService.refresh(any(RefreshTokenRequestDto.class))).thenReturn(buildAuthResponse());
 
-        mockMvc.perform(post("/api/auth/refresh")
+        mockMvc.perform(post("/api/v1/auth/refresh")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isOk())
@@ -106,13 +106,13 @@ class AuthControllerTest {
 
         when(authService.login(any(AuthLoginRequestDto.class))).thenThrow(new UnauthorizedException("Invalid credentials"));
 
-        mockMvc.perform(post("/api/auth/login")
+        mockMvc.perform(post("/api/v1/auth/login")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isUnauthorized())
                 .andExpect(jsonPath("$.status").value(401))
                 .andExpect(jsonPath("$.error").value("Unauthorized"))
-                .andExpect(jsonPath("$.path").value("/api/auth/login"));
+                .andExpect(jsonPath("$.path").value("/api/v1/auth/login"));
     }
 
     @Test
@@ -124,7 +124,7 @@ class AuthControllerTest {
                 .password("short")
                 .build();
 
-        mockMvc.perform(post("/api/auth/register")
+        mockMvc.perform(post("/api/v1/auth/register")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isBadRequest())
@@ -134,7 +134,7 @@ class AuthControllerTest {
 
     @Test
     void shouldReturnBadRequestWhenJsonBodyIsMalformed() throws Exception {
-        mockMvc.perform(post("/api/auth/login")
+        mockMvc.perform(post("/api/v1/auth/login")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("{"))
                 .andExpect(status().isBadRequest())

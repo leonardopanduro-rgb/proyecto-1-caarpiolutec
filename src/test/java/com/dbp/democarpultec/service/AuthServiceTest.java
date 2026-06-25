@@ -12,6 +12,7 @@ import com.dbp.democarpultec.exception.UnauthorizedException;
 import com.dbp.democarpultec.model.User;
 import com.dbp.democarpultec.model.enums.Role;
 import com.dbp.democarpultec.repository.UserRepository;
+import com.dbp.democarpultec.service.impl.AuthServiceImpl;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
@@ -44,7 +45,7 @@ class AuthServiceTest {
     private PasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
 
     @InjectMocks
-    private AuthService authService;
+    private AuthServiceImpl authService;
 
     @Test
     void shouldRegisterWhenDataIsValid() {
@@ -84,8 +85,8 @@ class AuthServiceTest {
         ArgumentCaptor<UserRegisteredEvent> eventCaptor = ArgumentCaptor.forClass(UserRegisteredEvent.class);
         verify(applicationEventPublisher).publishEvent(eventCaptor.capture());
         UserRegisteredEvent event = eventCaptor.getValue();
-        assertEquals(1L, event.userId());
-        assertEquals("juan@utec.edu.pe", event.email());
+        assertEquals(1L, event.getUserId());
+        assertEquals("juan@utec.edu.pe", event.getEmail());
     }
 
     @Test

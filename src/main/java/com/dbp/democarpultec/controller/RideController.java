@@ -3,12 +3,14 @@ package com.dbp.democarpultec.controller;
 import com.dbp.democarpultec.dto.RideResponseDto;
 import com.dbp.democarpultec.service.RideService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/rides")
+@RequestMapping("/api/v1/rides")
+@PreAuthorize("hasAnyRole('USER', 'ADMIN')")
 @RequiredArgsConstructor
 public class RideController {
 

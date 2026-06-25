@@ -30,7 +30,7 @@ public class RidePassengerControllerTest {
     void shouldReturnAllRidePassengersWhenPassengersExist() throws Exception {
         when(ridePassengerService.findAll()).thenReturn(List.of(buildResponse()));
 
-        mockMvc.perform(get("/api/ride-passengers"))
+        mockMvc.perform(get("/api/v1/ride-passengers"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$[0].passengerId").value(1));
     }
@@ -39,7 +39,7 @@ public class RidePassengerControllerTest {
     void shouldReturnRidePassengerWhenIdExists() throws Exception {
         when(ridePassengerService.findById(1L)).thenReturn(buildResponse());
 
-        mockMvc.perform(get("/api/ride-passengers/1"))
+        mockMvc.perform(get("/api/v1/ride-passengers/1"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.rideId").value(1));
     }
@@ -49,13 +49,13 @@ public class RidePassengerControllerTest {
         when(ridePassengerService.findById(99L))
                 .thenThrow(new EntityNotFoundException("RidePassenger not found with id 99"));
 
-        mockMvc.perform(get("/api/ride-passengers/99"))
+        mockMvc.perform(get("/api/v1/ride-passengers/99"))
                 .andExpect(status().isNotFound());
     }
 
     @Test
     void shouldNotExposeManualPassengerCreation() throws Exception {
-        mockMvc.perform(post("/api/ride-passengers")
+        mockMvc.perform(post("/api/v1/ride-passengers")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("{}"))
                 .andExpect(status().isMethodNotAllowed());
@@ -65,7 +65,7 @@ public class RidePassengerControllerTest {
 
     @Test
     void shouldNotExposeManualPassengerUpdates() throws Exception {
-        mockMvc.perform(put("/api/ride-passengers/1")
+        mockMvc.perform(put("/api/v1/ride-passengers/1")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("{}"))
                 .andExpect(status().isMethodNotAllowed());
@@ -75,7 +75,7 @@ public class RidePassengerControllerTest {
 
     @Test
     void shouldNotExposeManualPassengerDeletion() throws Exception {
-        mockMvc.perform(delete("/api/ride-passengers/1"))
+        mockMvc.perform(delete("/api/v1/ride-passengers/1"))
                 .andExpect(status().isMethodNotAllowed());
 
         verify(ridePassengerService, never()).delete(anyLong());

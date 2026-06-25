@@ -42,9 +42,9 @@ class SecurityIntegrationTest extends PostgresContainerTest {
     private JwtService jwtService;
 
     @Test
-    void shouldAllowPublicPublicationListingWithoutToken() throws Exception {
-        mockMvc.perform(get("/api/publications"))
-                .andExpect(status().isOk());
+    void shouldRequireTokenForPublicationListing() throws Exception {
+        mockMvc.perform(get("/api/v1/publications"))
+                .andExpect(status().isUnauthorized());
     }
 
     @Test
@@ -56,7 +56,7 @@ class SecurityIntegrationTest extends PostgresContainerTest {
 
     @Test
     void shouldAllowRegistrationRouteWithoutToken() throws Exception {
-        mockMvc.perform(post("/api/auth/register")
+        mockMvc.perform(post("/api/v1/auth/register")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("{}"))
                 .andExpect(status().isBadRequest());
@@ -64,20 +64,21 @@ class SecurityIntegrationTest extends PostgresContainerTest {
 
     @Test
     void shouldReturnUnauthorizedWhenProtectedEndpointHasNoToken() throws Exception {
-        mockMvc.perform(get("/api/users/me"))
+        mockMvc.perform(get("/api/v1/users/me"))
                 .andExpect(status().isUnauthorized())
                 .andExpect(jsonPath("$.status").value(401))
-                .andExpect(jsonPath("$.path").value("/api/users/me"));
+                .andExpect(jsonPath("$.path").value("/api/v1/users/me"));
     }
 
     @Test
     void shouldRequireAuthenticationForSensitiveReadEndpoints() throws Exception {
         for (String endpoint : List.of(
-                "/api/vehicles",
-                "/api/request-publications",
-                "/api/rides",
-                "/api/ride-passengers",
-                "/api/reviews")) {
+                "/api/v1/publications",
+                "/api/v1/vehicles",
+                "/api/v1/request-publications",
+                "/api/v1/rides",
+                "/api/v1/ride-passengers",
+                "/api/v1/reviews")) {
             mockMvc.perform(get(endpoint))
                     .andExpect(status().isUnauthorized());
         }
@@ -85,17 +86,26 @@ class SecurityIntegrationTest extends PostgresContainerTest {
 
     @Test
     void shouldReturnUnauthorizedWhenProtectedEndpointHasInvalidToken() throws Exception {
-        mockMvc.perform(get("/api/users/me")
+        mockMvc.perform(get("/api/v1/users/me")
                         .header(HttpHeaders.AUTHORIZATION, "Bearer invalid-token"))
                 .andExpect(status().isUnauthorized());
     }
 
     @Test
     void shouldReturnUnauthorizedWhenCreatingPublicationWithoutToken() throws Exception {
-        mockMvc.perform(post("/api/publications")
+        mockMvc.perform(post("/api/v1/publications")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("{}"))
                 .andExpect(status().isUnauthorized());
+    }
+
+    @Test
+    void shouldAllowUserRoleToReadPublicationListing() throws Exception {
+        User user = saveUser("publication.reader@utec.edu.pe", Role.USER);
+
+        mockMvc.perform(get("/api/v1/publications")
+                        .header(HttpHeaders.AUTHORIZATION, "Bearer " + jwtService.generateToken(user)))
+                .andExpect(status().isOk());
     }
 
     @Test
@@ -103,7 +113,7 @@ class SecurityIntegrationTest extends PostgresContainerTest {
         User user = saveUser("juan.security@utec.edu.pe", Role.USER);
         String token = jwtService.generateToken(user);
 
-        mockMvc.perform(get("/api/users/me")
+        mockMvc.perform(get("/api/v1/users/me")
                         .header(HttpHeaders.AUTHORIZATION, "Bearer " + token))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.id").value(user.getId()))
@@ -118,7 +128,7 @@ class SecurityIntegrationTest extends PostgresContainerTest {
     void shouldIssueNewTokensWhenRefreshTokenIsValid() throws Exception {
         User user = saveUser("refresh.user@utec.edu.pe", Role.USER);
 
-        mockMvc.perform(post("/api/auth/refresh")
+        mockMvc.perform(post("/api/v1/auth/refresh")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("{\"refreshToken\":\"" + jwtService.generateRefreshToken(user) + "\"}"))
                 .andExpect(status().isOk())
@@ -131,7 +141,7 @@ class SecurityIntegrationTest extends PostgresContainerTest {
     void shouldNotAuthenticateWhenRefreshTokenIsUsedAsAccessToken() throws Exception {
         User user = saveUser("refresh.header@utec.edu.pe", Role.USER);
 
-        mockMvc.perform(get("/api/users/me")
+        mockMvc.perform(get("/api/v1/users/me")
                         .header(HttpHeaders.AUTHORIZATION, "Bearer " + jwtService.generateRefreshToken(user)))
                 .andExpect(status().isUnauthorized());
     }
@@ -140,7 +150,7 @@ class SecurityIntegrationTest extends PostgresContainerTest {
     void shouldReturnForbiddenWhenUserRoleReadsAdministrativeUsersEndpoint() throws Exception {
         User user = saveUser("basic.user@utec.edu.pe", Role.USER);
 
-        mockMvc.perform(get("/api/users")
+        mockMvc.perform(get("/api/v1/users")
                         .header(HttpHeaders.AUTHORIZATION, "Bearer " + jwtService.generateToken(user)))
                 .andExpect(status().isForbidden())
                 .andExpect(jsonPath("$.status").value(403));
@@ -150,7 +160,7 @@ class SecurityIntegrationTest extends PostgresContainerTest {
     void shouldAllowAdminRoleToReadAdministrativeUsersEndpoint() throws Exception {
         User admin = saveUser("admin@utec.edu.pe", Role.ADMIN);
 
-        mockMvc.perform(get("/api/users")
+        mockMvc.perform(get("/api/v1/users")
                         .header(HttpHeaders.AUTHORIZATION, "Bearer " + jwtService.generateToken(admin)))
                 .andExpect(status().isOk());
     }

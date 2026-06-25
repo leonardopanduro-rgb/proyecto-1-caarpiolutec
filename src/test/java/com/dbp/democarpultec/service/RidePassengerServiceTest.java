@@ -6,6 +6,7 @@ import com.dbp.democarpultec.model.Ride;
 import com.dbp.democarpultec.model.RidePassenger;
 import com.dbp.democarpultec.model.User;
 import com.dbp.democarpultec.repository.RidePassengerRepository;
+import com.dbp.democarpultec.service.impl.RidePassengerServiceImpl;
 import jakarta.persistence.EntityNotFoundException;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -30,7 +31,7 @@ public class RidePassengerServiceTest {
     private RideService rideService;
 
     @InjectMocks
-    private RidePassengerService ridePassengerService;
+    private RidePassengerServiceImpl ridePassengerService;
 
     @Test
     void shouldCreateRidePassengerWhenValidData() {

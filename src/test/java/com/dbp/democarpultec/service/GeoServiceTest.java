@@ -1,5 +1,6 @@
 package com.dbp.democarpultec.service;
 
+import com.dbp.democarpultec.service.impl.GeoServiceImpl;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -46,7 +47,7 @@ class GeoServiceTest {
         GoogleMapsService googleMapsService = mock(GoogleMapsService.class);
         when(googleMapsService.drivingDistanceKm(-12.121, -77.031, -12.068335, -77.080902))
                 .thenReturn(12.34);
-        GeoService geoService = new GeoService(-12.068335, -77.080902, googleMapsService);
+        GeoService geoService = new GeoServiceImpl(-12.068335, -77.080902, googleMapsService);
 
         Double distance = geoService.distanceToUtecKm(-12.121, -77.031);
 
@@ -57,6 +58,6 @@ class GeoServiceTest {
         GoogleMapsService googleMapsService = mock(GoogleMapsService.class);
         when(googleMapsService.drivingDistanceKm(anyDouble(), anyDouble(), anyDouble(), anyDouble()))
                 .thenReturn(null);
-        return new GeoService(-12.068335, -77.080902, googleMapsService);
+        return new GeoServiceImpl(-12.068335, -77.080902, googleMapsService);
     }
 }
