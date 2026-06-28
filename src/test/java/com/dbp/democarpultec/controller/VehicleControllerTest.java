@@ -71,7 +71,7 @@ public class VehicleControllerTest {
     void shouldReturnAllVehiclesWhenVehiclesExist() throws Exception {
         when(vehicleService.findAll()).thenReturn(List.of(buildResponse()));
 
-        mockMvc.perform(get("/api/vehicles"))
+        mockMvc.perform(get("/api/v1/vehicles"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.length()").value(1))
                 .andExpect(jsonPath("$[0].plate").value("ABC-123"))
@@ -84,7 +84,7 @@ public class VehicleControllerTest {
     void shouldReturnEmptyListWhenNoVehiclesExist() throws Exception {
         when(vehicleService.findAll()).thenReturn(List.of());
 
-        mockMvc.perform(get("/api/vehicles"))
+        mockMvc.perform(get("/api/v1/vehicles"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.length()").value(0));
     }
@@ -93,7 +93,7 @@ public class VehicleControllerTest {
     void shouldReturnVehicleWhenIdExists() throws Exception {
         when(vehicleService.findById(1L)).thenReturn(buildResponse());
 
-        mockMvc.perform(get("/api/vehicles/1"))
+        mockMvc.perform(get("/api/v1/vehicles/1"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.id").value(1))
                 .andExpect(jsonPath("$.plate").value("ABC-123"))
@@ -106,7 +106,7 @@ public class VehicleControllerTest {
     void shouldReturn404WhenVehicleNotFound() throws Exception {
         when(vehicleService.findById(99L)).thenThrow(new EntityNotFoundException("Vehicle not found with id 99"));
 
-        mockMvc.perform(get("/api/vehicles/99"))
+        mockMvc.perform(get("/api/v1/vehicles/99"))
                 .andExpect(status().isNotFound());
 
         verify(vehicleService).findById(99L);
@@ -116,7 +116,7 @@ public class VehicleControllerTest {
     void shouldCreateVehicleWhenValidRequest() throws Exception {
         when(vehicleService.createAuthenticated(eq(1L), any(VehicleRequestDto.class))).thenReturn(buildResponse());
 
-        mockMvc.perform(post("/api/vehicles")
+        mockMvc.perform(post("/api/v1/vehicles")
                         .principal(() -> "juan@utec.edu.pe")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(buildRequest())))
@@ -137,7 +137,7 @@ public class VehicleControllerTest {
                 .seats(0)
                 .build();
 
-        mockMvc.perform(post("/api/vehicles")
+        mockMvc.perform(post("/api/v1/vehicles")
                         .principal(() -> "juan@utec.edu.pe")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(invalid)))
@@ -168,7 +168,7 @@ public class VehicleControllerTest {
                 .seats(5)
                 .build();
 
-        mockMvc.perform(put("/api/vehicles/1")
+        mockMvc.perform(put("/api/v1/vehicles/1")
                         .principal(() -> "juan@utec.edu.pe")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(req)))
@@ -183,7 +183,7 @@ public class VehicleControllerTest {
     void shouldReturn404WhenUpdatingNonExistentVehicle() throws Exception {
         when(vehicleService.updateAuthenticated(eq(99L), eq(1L), any(VehicleRequestDto.class))).thenThrow(new EntityNotFoundException("Vehicle not found with id 99"));
 
-        mockMvc.perform(put("/api/vehicles/99")
+        mockMvc.perform(put("/api/v1/vehicles/99")
                         .principal(() -> "juan@utec.edu.pe")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(buildRequest())))
@@ -196,7 +196,7 @@ public class VehicleControllerTest {
     void shouldDeleteVehicleWhenIdExists() throws Exception {
         doNothing().when(vehicleService).deleteAuthenticated(1L, 1L);
 
-        mockMvc.perform(delete("/api/vehicles/1")
+        mockMvc.perform(delete("/api/v1/vehicles/1")
                         .principal(() -> "juan@utec.edu.pe"))
                 .andExpect(status().isNoContent());
 
@@ -207,7 +207,7 @@ public class VehicleControllerTest {
     void shouldReturn404WhenDeletingNonExistentVehicle() throws Exception {
         doThrow(new EntityNotFoundException("Vehicle not found with id 99")).when(vehicleService).deleteAuthenticated(99L, 1L);
 
-        mockMvc.perform(delete("/api/vehicles/99")
+        mockMvc.perform(delete("/api/v1/vehicles/99")
                         .principal(() -> "juan@utec.edu.pe"))
                 .andExpect(status().isNotFound());
 

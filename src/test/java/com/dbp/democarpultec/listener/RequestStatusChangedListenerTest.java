@@ -16,6 +16,7 @@ class RequestStatusChangedListenerTest {
         RequestStatusChangedListener listener = new RequestStatusChangedListener(emailService);
 
         listener.onRequestStatusChanged(new RequestStatusChangedEvent(
+                listener,
                 1L,
                 "juan@utec.edu.pe",
                 "Juan",

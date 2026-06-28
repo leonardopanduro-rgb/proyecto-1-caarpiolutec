@@ -16,6 +16,7 @@ import com.dbp.democarpultec.model.enums.Status;
 import com.dbp.democarpultec.repository.RequestPublicationRepository;
 import com.dbp.democarpultec.repository.RidePassengerRepository;
 import com.dbp.democarpultec.repository.RideRepository;
+import com.dbp.democarpultec.service.impl.RequestPublicationServiceImpl;
 import jakarta.persistence.EntityNotFoundException;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -58,7 +59,7 @@ public class RequestPublicationServiceTest {
     private ApplicationEventPublisher applicationEventPublisher;
 
     @InjectMocks
-    private RequestPublicationService requestPublicationService;
+    private RequestPublicationServiceImpl requestPublicationService;
 
     @Test
     void shouldCreateRequestPublicationWhenValidData() {

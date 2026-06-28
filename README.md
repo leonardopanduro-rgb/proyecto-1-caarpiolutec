@@ -153,20 +153,24 @@ Cliente HTTP
 
 ## Endpoints Principales
 
+Base URL local: `http://localhost:8080/api/v1`
+
+Si un frontend Expo consume este backend, debe apuntar a `EXPO_PUBLIC_API_URL=http://localhost:8080/api/v1`.
+
 | Metodo | Ruta | Descripcion | Acceso |
 | --- | --- | --- | --- |
-| `POST` | `/api/auth/register` | Registra un estudiante | Publico |
-| `POST` | `/api/auth/login` | Inicia sesion y retorna tokens | Publico |
-| `POST` | `/api/auth/refresh` | Renueva el access token | Publico |
-| `GET` | `/api/publications` | Lista publicaciones disponibles | Publico |
-| `POST` | `/api/publications` | Crea una publicacion | Autenticado |
-| `POST` | `/api/vehicles` | Registra un vehiculo propio | Autenticado |
-| `POST` | `/api/request-publications` | Crea una solicitud | Autenticado |
-| `PATCH` | `/api/request-publications/{id}/accept` | Acepta una solicitud | Autor de la publicacion |
-| `GET` | `/api/rides` | Consulta viajes confirmados | Autenticado |
-| `POST` | `/api/reviews` | Califica a un participante del viaje | Autenticado |
-| `GET` | `/api/users/me` | Consulta el perfil y rating propios | Autenticado |
-| `GET` | `/api/users/{id}` | Consulta el usuario y su rating calculado | Administrador |
+| `POST` | `/api/v1/auth/register` | Registra un estudiante | Publico |
+| `POST` | `/api/v1/auth/login` | Inicia sesion y retorna tokens | Publico |
+| `POST` | `/api/v1/auth/refresh` | Renueva el access token | Publico |
+| `GET` | `/api/v1/publications` | Lista publicaciones disponibles | Autenticado |
+| `POST` | `/api/v1/publications` | Crea una publicacion | Autenticado |
+| `POST` | `/api/v1/vehicles` | Registra un vehiculo propio | Autenticado |
+| `POST` | `/api/v1/request-publications` | Crea una solicitud | Autenticado |
+| `PATCH` | `/api/v1/request-publications/{id}/accept` | Acepta una solicitud | Autor de la publicacion |
+| `GET` | `/api/v1/rides` | Consulta viajes confirmados | Autenticado |
+| `POST` | `/api/v1/reviews` | Califica a un participante del viaje | Autenticado |
+| `GET` | `/api/v1/users/me` | Consulta el perfil y rating propios | Autenticado |
+| `GET` | `/api/v1/users/{id}` | Consulta el usuario y su rating calculado | Administrador |
 | `GET` | `/actuator/health` | Verifica disponibilidad del backend | Publico |
 
 Las rutas de viajes y pasajeros se utilizan para consulta del flujo confirmado. La creacion de estas entidades ocurre durante la aceptacion de solicitudes.

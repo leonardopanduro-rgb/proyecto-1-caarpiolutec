@@ -48,7 +48,7 @@ public class ReviewControllerTest {
     void shouldReturnAllReviewsWhenReviewsExist() throws Exception {
         when(reviewService.findAll()).thenReturn(List.of(buildResponse()));
 
-        mockMvc.perform(get("/api/reviews"))
+        mockMvc.perform(get("/api/v1/reviews"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$[0].rating").value(5));
     }
@@ -57,7 +57,7 @@ public class ReviewControllerTest {
     void shouldReturnReviewWhenIdExists() throws Exception {
         when(reviewService.findById(1L)).thenReturn(buildResponse());
 
-        mockMvc.perform(get("/api/reviews/1"))
+        mockMvc.perform(get("/api/v1/reviews/1"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.reviewerId").value(1));
     }
@@ -66,7 +66,7 @@ public class ReviewControllerTest {
     void shouldReturn404WhenReviewNotFound() throws Exception {
         when(reviewService.findById(99L)).thenThrow(new EntityNotFoundException("Review not found with id 99"));
 
-        mockMvc.perform(get("/api/reviews/99"))
+        mockMvc.perform(get("/api/v1/reviews/99"))
                 .andExpect(status().isNotFound());
     }
 
@@ -74,7 +74,7 @@ public class ReviewControllerTest {
     void shouldCreateReviewUsingAuthenticatedReviewer() throws Exception {
         when(reviewService.createAuthenticated(eq(1L), any(ReviewRequestDto.class))).thenReturn(buildResponse());
 
-        mockMvc.perform(post("/api/reviews")
+        mockMvc.perform(post("/api/v1/reviews")
                         .principal(() -> "reviewer@utec.edu.pe")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(buildRequest())))
@@ -92,7 +92,7 @@ public class ReviewControllerTest {
                 .rating(6)
                 .build();
 
-        mockMvc.perform(post("/api/reviews")
+        mockMvc.perform(post("/api/v1/reviews")
                         .principal(() -> "reviewer@utec.edu.pe")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(invalid)))
@@ -112,7 +112,7 @@ public class ReviewControllerTest {
         request.setRating(3);
         request.setComment("Bien, pero llego tarde");
 
-        mockMvc.perform(put("/api/reviews/1")
+        mockMvc.perform(put("/api/v1/reviews/1")
                         .principal(() -> "reviewer@utec.edu.pe")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
@@ -125,7 +125,7 @@ public class ReviewControllerTest {
         when(reviewService.updateAuthenticated(eq(99L), eq(1L), any(ReviewRequestDto.class)))
                 .thenThrow(new EntityNotFoundException("Review not found with id 99"));
 
-        mockMvc.perform(put("/api/reviews/99")
+        mockMvc.perform(put("/api/v1/reviews/99")
                         .principal(() -> "reviewer@utec.edu.pe")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(buildRequest())))
@@ -134,7 +134,7 @@ public class ReviewControllerTest {
 
     @Test
     void shouldDeleteReviewUsingAuthenticatedUser() throws Exception {
-        mockMvc.perform(delete("/api/reviews/1")
+        mockMvc.perform(delete("/api/v1/reviews/1")
                         .principal(() -> "reviewer@utec.edu.pe"))
                 .andExpect(status().isNoContent());
 

@@ -3,6 +3,7 @@ package com.dbp.democarpultec.exception;
 import com.dbp.democarpultec.dto.ErrorResponseDto;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.servlet.http.HttpServletRequest;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
@@ -74,6 +75,15 @@ public class RestExceptionHandler {
             HttpServletRequest request
     ) {
         return buildError(HttpStatus.METHOD_NOT_ALLOWED, "Method not allowed", request, null);
+    }
+
+    @ExceptionHandler(DataIntegrityViolationException.class)
+    public ResponseEntity<ErrorResponseDto> handleDataIntegrity(
+            DataIntegrityViolationException exception,
+            HttpServletRequest request
+    ) {
+        return buildError(HttpStatus.CONFLICT,
+                "Ya existe un registro con esos datos (correo, telefono o codigo).", request, null);
     }
 
     @ExceptionHandler(Exception.class)

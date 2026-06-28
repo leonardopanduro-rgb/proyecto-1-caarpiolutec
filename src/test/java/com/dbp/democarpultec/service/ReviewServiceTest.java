@@ -10,6 +10,7 @@ import com.dbp.democarpultec.model.User;
 import com.dbp.democarpultec.model.enums.Role;
 import com.dbp.democarpultec.repository.ReviewRepository;
 import com.dbp.democarpultec.repository.RidePassengerRepository;
+import com.dbp.democarpultec.service.impl.ReviewServiceImpl;
 import jakarta.persistence.EntityNotFoundException;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -34,7 +35,7 @@ public class ReviewServiceTest {
     @Mock
     private RidePassengerRepository ridePassengerRepository;
     @InjectMocks
-    private ReviewService reviewService;
+    private ReviewServiceImpl reviewService;
 
     @Test
     void shouldCreateReviewFromAuthenticatedParticipantAndRecalculateRating() {

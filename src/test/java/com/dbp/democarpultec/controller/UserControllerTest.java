@@ -68,7 +68,7 @@ public class UserControllerTest {
     void shouldReturnAllUsersWhenUsersExist() throws Exception {
         when(userService.findAll()).thenReturn(List.of(buildResponse()));
 
-        mockMvc.perform(get("/api/users"))
+        mockMvc.perform(get("/api/v1/users"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.length()").value(1))
                 .andExpect(jsonPath("$[0].name").value("Juan"))
@@ -81,7 +81,7 @@ public class UserControllerTest {
     void shouldReturnEmptyListWhenNoUsersExist() throws Exception {
         when(userService.findAll()).thenReturn(List.of());
 
-        mockMvc.perform(get("/api/users"))
+        mockMvc.perform(get("/api/v1/users"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.length()").value(0));
     }
@@ -90,7 +90,7 @@ public class UserControllerTest {
     void shouldReturnUserWhenIdExists() throws Exception {
         when(userService.findById(1L)).thenReturn(buildResponse());
 
-        mockMvc.perform(get("/api/users/1"))
+        mockMvc.perform(get("/api/v1/users/1"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.id").value(1))
                 .andExpect(jsonPath("$.name").value("Juan"))
@@ -103,7 +103,7 @@ public class UserControllerTest {
     void shouldReturn404WhenUserNotFound() throws Exception {
         when(userService.findById(99L)).thenThrow(new EntityNotFoundException("User not found with id 99"));
 
-        mockMvc.perform(get("/api/users/99"))
+        mockMvc.perform(get("/api/v1/users/99"))
                 .andExpect(status().isNotFound());
 
         verify(userService).findById(99L);
@@ -113,7 +113,7 @@ public class UserControllerTest {
     void shouldCreateUserWhenValidRequest() throws Exception {
         when(userService.create(any(UserRequestDto.class))).thenReturn(buildResponse());
 
-        mockMvc.perform(post("/api/users")
+        mockMvc.perform(post("/api/v1/users")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(buildRequest())))
                 .andExpect(status().isCreated())
@@ -131,7 +131,7 @@ public class UserControllerTest {
                 .email("no-es-email")
                 .build();
 
-        mockMvc.perform(post("/api/users")
+        mockMvc.perform(post("/api/v1/users")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(invalid)))
                 .andExpect(status().isBadRequest());
@@ -157,7 +157,7 @@ public class UserControllerTest {
                 .email("pedro@test.com")
                 .build();
 
-        mockMvc.perform(put("/api/users/1")
+        mockMvc.perform(put("/api/v1/users/1")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(req)))
                 .andExpect(status().isOk())
@@ -171,7 +171,7 @@ public class UserControllerTest {
     void shouldReturn404WhenUpdatingNonExistentUser() throws Exception {
         when(userService.update(eq(99L), any(UserRequestDto.class))).thenThrow(new EntityNotFoundException("User not found with id 99"));
 
-        mockMvc.perform(put("/api/users/99")
+        mockMvc.perform(put("/api/v1/users/99")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(buildRequest())))
                 .andExpect(status().isNotFound());
@@ -181,7 +181,7 @@ public class UserControllerTest {
     void shouldDeleteUserWhenIdExists() throws Exception {
         doNothing().when(userService).delete(1L);
 
-        mockMvc.perform(delete("/api/users/1"))
+        mockMvc.perform(delete("/api/v1/users/1"))
                 .andExpect(status().isNoContent());
 
         verify(userService).delete(1L);
@@ -191,7 +191,7 @@ public class UserControllerTest {
     void shouldReturn404WhenDeletingNonExistentUser() throws Exception {
         doThrow(new EntityNotFoundException("User not found with id 99")).when(userService).delete(99L);
 
-        mockMvc.perform(delete("/api/users/99"))
+        mockMvc.perform(delete("/api/v1/users/99"))
                 .andExpect(status().isNotFound());
 
         verify(userService).delete(99L);
@@ -201,7 +201,7 @@ public class UserControllerTest {
     void shouldReturnAuthenticatedUserWhenTokenIsValid() throws Exception {
         when(authService.getCurrentUserByEmail("juan@test.com")).thenReturn(buildResponse());
 
-        mockMvc.perform(get("/api/users/me")
+        mockMvc.perform(get("/api/v1/users/me")
                         .principal(() -> "juan@test.com"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.id").value(1))

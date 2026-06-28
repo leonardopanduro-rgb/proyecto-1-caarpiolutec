@@ -109,7 +109,7 @@ public class PublicationControllerTest {
     void shouldReturnAllPublicationsWhenPublicationsExist() throws Exception {
         when(publicationService.findAll()).thenReturn(List.of(buildResponse()));
 
-        mockMvc.perform(get("/api/publications"))
+        mockMvc.perform(get("/api/v1/publications"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.length()").value(1))
                 .andExpect(jsonPath("$[0].titulo").value("Viaje a Miraflores"))
@@ -122,7 +122,7 @@ public class PublicationControllerTest {
     void shouldReturnEmptyListWhenNoPublicationsExist() throws Exception {
         when(publicationService.findAll()).thenReturn(List.of());
 
-        mockMvc.perform(get("/api/publications"))
+        mockMvc.perform(get("/api/v1/publications"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.length()").value(0));
     }
@@ -131,7 +131,7 @@ public class PublicationControllerTest {
     void shouldReturnPublicationWhenIdExists() throws Exception {
         when(publicationService.findById(1L)).thenReturn(buildResponse());
 
-        mockMvc.perform(get("/api/publications/1"))
+        mockMvc.perform(get("/api/v1/publications/1"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.id").value(1))
                 .andExpect(jsonPath("$.titulo").value("Viaje a Miraflores"))
@@ -145,7 +145,7 @@ public class PublicationControllerTest {
     void shouldReturn404WhenPublicationNotFound() throws Exception {
         when(publicationService.findById(99L)).thenThrow(new EntityNotFoundException("Publication not found with id 99"));
 
-        mockMvc.perform(get("/api/publications/99"))
+        mockMvc.perform(get("/api/v1/publications/99"))
                 .andExpect(status().isNotFound());
 
         verify(publicationService).findById(99L);
@@ -156,7 +156,7 @@ public class PublicationControllerTest {
         when(authService.getCurrentUserByEmail("juan@utec.edu.pe")).thenReturn(buildCurrentUser());
         when(publicationService.createAuthenticated(eq(1L), any(PublicationRequestDto.class))).thenReturn(buildResponse());
 
-        mockMvc.perform(post("/api/publications")
+        mockMvc.perform(post("/api/v1/publications")
                         .principal(() -> "juan@utec.edu.pe")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(buildRequest())))
@@ -181,7 +181,7 @@ public class PublicationControllerTest {
         when(requestPublicationService.createForPublication(eq(1L), eq(1L), any(RequestPublicationRequestDto.class)))
                 .thenReturn(buildRequestPublicationResponse());
 
-        mockMvc.perform(post("/api/publications/1/requests")
+        mockMvc.perform(post("/api/v1/publications/1/requests")
                         .principal(() -> "juan@utec.edu.pe")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
@@ -195,7 +195,7 @@ public class PublicationControllerTest {
         when(authService.getCurrentUserByEmail("juan@utec.edu.pe")).thenReturn(buildCurrentUser());
         when(requestPublicationService.findByPublication(1L, 1L)).thenReturn(List.of(buildRequestPublicationResponse()));
 
-        mockMvc.perform(get("/api/publications/1/requests")
+        mockMvc.perform(get("/api/v1/publications/1/requests")
                         .principal(() -> "juan@utec.edu.pe"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.length()").value(1))
@@ -214,7 +214,7 @@ public class PublicationControllerTest {
                 .authorId(1L)
                 .build();
 
-        mockMvc.perform(post("/api/publications")
+        mockMvc.perform(post("/api/v1/publications")
                         .principal(() -> "juan@utec.edu.pe")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(invalid)))
@@ -235,7 +235,7 @@ public class PublicationControllerTest {
                 .authorId(1L)
                 .build();
 
-        mockMvc.perform(post("/api/publications")
+        mockMvc.perform(post("/api/v1/publications")
                         .principal(() -> "juan@utec.edu.pe")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(invalid)))
@@ -251,7 +251,7 @@ public class PublicationControllerTest {
                 .destinationOrOrigin("Surco")
                 .build();
 
-        mockMvc.perform(post("/api/publications")
+        mockMvc.perform(post("/api/v1/publications")
                         .principal(() -> "juan@utec.edu.pe")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(invalid)))
@@ -288,7 +288,7 @@ public class PublicationControllerTest {
                 .authorId(1L)
                 .build();
 
-        mockMvc.perform(put("/api/publications/1")
+        mockMvc.perform(put("/api/v1/publications/1")
                         .principal(() -> "juan@utec.edu.pe")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(req)))
@@ -305,7 +305,7 @@ public class PublicationControllerTest {
         when(authService.getCurrentUserByEmail("juan@utec.edu.pe")).thenReturn(buildCurrentUser());
         when(publicationService.updateAuthenticated(eq(99L), eq(1L), any(PublicationRequestDto.class))).thenThrow(new EntityNotFoundException("Publication not found with id 99"));
 
-        mockMvc.perform(put("/api/publications/99")
+        mockMvc.perform(put("/api/v1/publications/99")
                         .principal(() -> "juan@utec.edu.pe")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(buildRequest())))
@@ -319,7 +319,7 @@ public class PublicationControllerTest {
         when(authService.getCurrentUserByEmail("juan@utec.edu.pe")).thenReturn(buildCurrentUser());
         doNothing().when(publicationService).deleteAuthenticated(1L, 1L);
 
-        mockMvc.perform(delete("/api/publications/1")
+        mockMvc.perform(delete("/api/v1/publications/1")
                         .principal(() -> "juan@utec.edu.pe"))
                 .andExpect(status().isNoContent());
 
@@ -331,7 +331,7 @@ public class PublicationControllerTest {
         when(authService.getCurrentUserByEmail("juan@utec.edu.pe")).thenReturn(buildCurrentUser());
         doThrow(new EntityNotFoundException("Publication not found with id 99")).when(publicationService).deleteAuthenticated(99L, 1L);
 
-        mockMvc.perform(delete("/api/publications/99")
+        mockMvc.perform(delete("/api/v1/publications/99")
                         .principal(() -> "juan@utec.edu.pe"))
                 .andExpect(status().isNotFound());
 

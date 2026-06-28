@@ -14,7 +14,7 @@ class UserRegisteredListenerTest {
         RegistrationEmailService registrationEmailService = mock(RegistrationEmailService.class);
         UserRegisteredListener listener = new UserRegisteredListener(registrationEmailService);
 
-        listener.onUserRegistered(new UserRegisteredEvent(1L, "juan@utec.edu.pe", "Juan"));
+        listener.onUserRegistered(new UserRegisteredEvent(listener, 1L, "juan@utec.edu.pe", "Juan"));
 
         verify(registrationEmailService).sendWelcomeEmail("juan@utec.edu.pe", "Juan");
     }

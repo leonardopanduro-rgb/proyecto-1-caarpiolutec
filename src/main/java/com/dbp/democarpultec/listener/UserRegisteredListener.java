@@ -16,6 +16,6 @@ public class UserRegisteredListener {
     @Async("eventTaskExecutor")
     @EventListener
     public void onUserRegistered(UserRegisteredEvent event) {
-        registrationEmailService.sendWelcomeEmail(event.email(), event.name());
+        registrationEmailService.sendWelcomeEmail(event.getEmail(), event.getName());
     }
 }

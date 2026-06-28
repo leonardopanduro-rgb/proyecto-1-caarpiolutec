@@ -31,7 +31,7 @@ public class RideControllerTest {
     void shouldReturnAllRidesWhenRidesExist() throws Exception {
         when(rideService.findAll()).thenReturn(List.of(buildResponse()));
 
-        mockMvc.perform(get("/api/rides"))
+        mockMvc.perform(get("/api/v1/rides"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.length()").value(1))
                 .andExpect(jsonPath("$[0].destinationOrOrigin").value("Miraflores"));
@@ -41,7 +41,7 @@ public class RideControllerTest {
     void shouldReturnRideWhenIdExists() throws Exception {
         when(rideService.findById(1L)).thenReturn(buildResponse());
 
-        mockMvc.perform(get("/api/rides/1"))
+        mockMvc.perform(get("/api/v1/rides/1"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.driverId").value(1));
     }
@@ -50,13 +50,13 @@ public class RideControllerTest {
     void shouldReturn404WhenRideNotFound() throws Exception {
         when(rideService.findById(99L)).thenThrow(new EntityNotFoundException("Ride not found with id 99"));
 
-        mockMvc.perform(get("/api/rides/99"))
+        mockMvc.perform(get("/api/v1/rides/99"))
                 .andExpect(status().isNotFound());
     }
 
     @Test
     void shouldNotExposeManualRideCreation() throws Exception {
-        mockMvc.perform(post("/api/rides")
+        mockMvc.perform(post("/api/v1/rides")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("{}"))
                 .andExpect(status().isMethodNotAllowed());
@@ -66,7 +66,7 @@ public class RideControllerTest {
 
     @Test
     void shouldNotExposeManualRideUpdates() throws Exception {
-        mockMvc.perform(put("/api/rides/1")
+        mockMvc.perform(put("/api/v1/rides/1")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("{}"))
                 .andExpect(status().isMethodNotAllowed());
@@ -76,7 +76,7 @@ public class RideControllerTest {
 
     @Test
     void shouldNotExposeManualRideDeletion() throws Exception {
-        mockMvc.perform(delete("/api/rides/1"))
+        mockMvc.perform(delete("/api/v1/rides/1"))
                 .andExpect(status().isMethodNotAllowed());
 
         verify(rideService, never()).delete(anyLong());

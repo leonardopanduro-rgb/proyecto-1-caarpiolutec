@@ -77,7 +77,7 @@
               "mode": "raw",
               "raw": "{\n  \"name\": \"Daniel\",\n  \"lastName\": \"Conductor\",\n  \"email\": \"{{driverEmail}}\",\n  \"password\": \"{{password}}\",\n  \"phone\": \"900000001\",\n  \"studentCode\": \"U202600001\",\n  \"career\": \"Ciencia_de_la_Computacion\",\n  \"cycle\": 3\n}"
             },
-            "url": "{{baseUrl}}/api/auth/register",
+            "url": "{{baseUrl}}/api/v1/auth/register",
             "description": "Registrar una vez. Si el usuario ya existe, ejecute Login conductor."
           },
           "event": [
@@ -113,7 +113,7 @@
               "mode": "raw",
               "raw": "{\n  \"email\": \"{{driverEmail}}\",\n  \"password\": \"{{password}}\"\n}"
             },
-            "url": "{{baseUrl}}/api/auth/login"
+            "url": "{{baseUrl}}/api/v1/auth/login"
           },
           "event": [
             {
@@ -144,7 +144,7 @@
               "mode": "raw",
               "raw": "{\n  \"name\": \"Paola\",\n  \"lastName\": \"Pasajera\",\n  \"email\": \"{{passengerEmail}}\",\n  \"password\": \"{{password}}\",\n  \"phone\": \"900000002\",\n  \"studentCode\": \"U202600002\",\n  \"career\": \"Ciencia_de_Datos\",\n  \"cycle\": 3\n}"
             },
-            "url": "{{baseUrl}}/api/auth/register",
+            "url": "{{baseUrl}}/api/v1/auth/register",
             "description": "Registrar una vez. Si el usuario ya existe, ejecute Login pasajero."
           },
           "event": [
@@ -179,7 +179,7 @@
               "mode": "raw",
               "raw": "{\n  \"email\": \"{{passengerEmail}}\",\n  \"password\": \"{{password}}\"\n}"
             },
-            "url": "{{baseUrl}}/api/auth/login"
+            "url": "{{baseUrl}}/api/v1/auth/login"
           },
           "event": [
             {
@@ -209,7 +209,7 @@
               "mode": "raw",
               "raw": "{\n  \"refreshToken\": \"{{driverRefreshToken}}\"\n}"
             },
-            "url": "{{baseUrl}}/api/auth/refresh"
+            "url": "{{baseUrl}}/api/v1/auth/refresh"
           },
           "event": [
             {
@@ -240,7 +240,7 @@
                 "value": "Bearer {{driverToken}}"
               }
             ],
-            "url": "{{baseUrl}}/api/users/me"
+            "url": "{{baseUrl}}/api/v1/users/me"
           }
         },
         {
@@ -261,7 +261,7 @@
               "mode": "raw",
               "raw": "{\n  \"plate\": \"UTP-101\",\n  \"brand\": \"Toyota\",\n  \"model\": \"Yaris\",\n  \"color\": \"Plata\",\n  \"seats\": 4\n}"
             },
-            "url": "{{baseUrl}}/api/vehicles",
+            "url": "{{baseUrl}}/api/v1/vehicles",
             "description": "No contiene ownerId: el owner se obtiene del JWT del conductor."
           },
           "event": [
@@ -289,7 +289,7 @@
           "name": "Listar publicaciones publicas",
           "request": {
             "method": "GET",
-            "url": "{{baseUrl}}/api/publications"
+            "url": "{{baseUrl}}/api/v1/publications"
           }
         },
         {
@@ -310,7 +310,7 @@
               "mode": "raw",
               "raw": "{\n  \"fromUTEC\": true,\n  \"driverToPassenger\": true,\n  \"seats\": 3,\n  \"titulo\": \"Salida desde UTEC hacia Miraflores\",\n  \"descripcion\": \"Prueba de flujo Postman\",\n  \"destinationOrOrigin\": \"Parque Kennedy, Miraflores\",\n  \"departureTime\": \"2026-05-20T18:00:00\",\n  \"vehicleId\": {{vehicleId}}\n}"
             },
-            "url": "{{baseUrl}}/api/publications",
+            "url": "{{baseUrl}}/api/v1/publications",
             "description": "La fecha pasada facilita probar reviews despues de aceptar. Para un uso real cree viajes futuros."
           },
           "event": [
@@ -350,7 +350,7 @@
               "mode": "raw",
               "raw": "{\n  \"requesterIsDriver\": false,\n  \"seats\": 1,\n  \"message\": \"Tengo clases hasta las 6, puedo unirme?\",\n  \"pickupPointOrDestine\": \"Av. Larco 200, Miraflores\"\n}"
             },
-            "url": "{{baseUrl}}/api/publications/{{publicationId}}/requests",
+            "url": "{{baseUrl}}/api/v1/publications/{{publicationId}}/requests",
             "description": "No contiene requesterId: el requester se obtiene del JWT del pasajero."
           },
           "event": [
@@ -377,7 +377,7 @@
                 "value": "Bearer {{driverToken}}"
               }
             ],
-            "url": "{{baseUrl}}/api/publications/{{publicationId}}/requests"
+            "url": "{{baseUrl}}/api/v1/publications/{{publicationId}}/requests"
           }
         },
         {
@@ -398,7 +398,7 @@
               "mode": "raw",
               "raw": "{\n  \"vehicleId\": {{vehicleId}}\n}"
             },
-            "url": "{{baseUrl}}/api/request-publications/{{requestId}}/accept",
+            "url": "{{baseUrl}}/api/v1/request-publications/{{requestId}}/accept",
             "description": "Accept crea el Ride y RidePassenger; no use endpoints POST manuales."
           },
           "event": [
@@ -428,7 +428,7 @@
                 "value": "Bearer {{driverToken}}"
               }
             ],
-            "url": "{{baseUrl}}/api/rides"
+            "url": "{{baseUrl}}/api/v1/rides"
           },
           "event": [
             {
@@ -455,7 +455,7 @@
                 "value": "Bearer {{driverToken}}"
               }
             ],
-            "url": "{{baseUrl}}/api/ride-passengers"
+            "url": "{{baseUrl}}/api/v1/ride-passengers"
           }
         },
         {
@@ -476,7 +476,7 @@
               "mode": "raw",
               "raw": "{\n  \"rideId\": {{rideId}},\n  \"reviewedId\": {{driverId}},\n  \"rating\": 5,\n  \"comment\": \"Viaje puntual y seguro\"\n}"
             },
-            "url": "{{baseUrl}}/api/reviews",
+            "url": "{{baseUrl}}/api/v1/reviews",
             "description": "No contiene reviewerId: el reviewer se obtiene del JWT. Solo funciona si la hora del viaje ya paso."
           },
           "event": [
@@ -500,7 +500,7 @@
                 "value": "Bearer {{driverToken}}"
               }
             ],
-            "url": "{{baseUrl}}/api/users/me"
+            "url": "{{baseUrl}}/api/v1/users/me"
           },
           "event": [
             {
@@ -525,7 +525,7 @@
           "name": "GET vehicles sin token devuelve 401",
           "request": {
             "method": "GET",
-            "url": "{{baseUrl}}/api/vehicles"
+            "url": "{{baseUrl}}/api/v1/vehicles"
           },
           "event": [
             {
@@ -556,7 +556,7 @@
               "mode": "raw",
               "raw": "{}"
             },
-            "url": "{{baseUrl}}/api/rides"
+            "url": "{{baseUrl}}/api/v1/rides"
           },
           "event": [
             {
@@ -587,7 +587,7 @@
               "mode": "raw",
               "raw": "{}"
             },
-            "url": "{{baseUrl}}/api/ride-passengers"
+            "url": "{{baseUrl}}/api/v1/ride-passengers"
           },
           "event": [
             {

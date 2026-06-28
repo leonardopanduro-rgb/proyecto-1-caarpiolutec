@@ -1,5 +1,6 @@
 package com.dbp.democarpultec.service;
 
+import com.dbp.democarpultec.service.impl.RegistrationEmailServiceImpl;
 import jakarta.mail.Session;
 import jakarta.mail.internet.MimeMessage;
 import org.junit.jupiter.api.Test;
@@ -19,7 +20,7 @@ class RegistrationEmailServiceTest {
         JavaMailSender mailSender = mock(JavaMailSender.class);
         MimeMessage message = new MimeMessage((Session) null);
         when(mailSender.createMimeMessage()).thenReturn(message);
-        RegistrationEmailService service = new RegistrationEmailService();
+        RegistrationEmailServiceImpl service = new RegistrationEmailServiceImpl();
         ReflectionTestUtils.setField(service, "mailSender", mailSender);
         ReflectionTestUtils.setField(service, "fromAddress", "no-reply@carpoolutec.local");
 
@@ -30,7 +31,7 @@ class RegistrationEmailServiceTest {
 
     @Test
     void shouldSkipEmailWhenMailSenderIsNotConfigured() {
-        RegistrationEmailService service = new RegistrationEmailService();
+        RegistrationEmailServiceImpl service = new RegistrationEmailServiceImpl();
         ReflectionTestUtils.setField(service, "fromAddress", "no-reply@carpoolutec.local");
 
         assertDoesNotThrow(() -> service.sendWelcomeEmail("juan@utec.edu.pe", "Juan"));

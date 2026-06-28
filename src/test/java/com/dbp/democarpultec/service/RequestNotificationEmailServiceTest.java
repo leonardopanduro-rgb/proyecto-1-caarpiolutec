@@ -1,6 +1,7 @@
 package com.dbp.democarpultec.service;
 
 import com.dbp.democarpultec.model.enums.Status;
+import com.dbp.democarpultec.service.impl.RequestNotificationEmailServiceImpl;
 import jakarta.mail.Session;
 import jakarta.mail.internet.MimeMessage;
 import org.junit.jupiter.api.Test;
@@ -20,7 +21,7 @@ class RequestNotificationEmailServiceTest {
         JavaMailSender mailSender = mock(JavaMailSender.class);
         MimeMessage message = new MimeMessage((Session) null);
         when(mailSender.createMimeMessage()).thenReturn(message);
-        RequestNotificationEmailService service = new RequestNotificationEmailService();
+        RequestNotificationEmailServiceImpl service = new RequestNotificationEmailServiceImpl();
         ReflectionTestUtils.setField(service, "mailSender", mailSender);
         ReflectionTestUtils.setField(service, "fromAddress", "no-reply@carpoolutec.local");
 
@@ -31,7 +32,7 @@ class RequestNotificationEmailServiceTest {
 
     @Test
     void shouldSkipEmailWhenRecipientIsMissing() {
-        RequestNotificationEmailService service = new RequestNotificationEmailService();
+        RequestNotificationEmailServiceImpl service = new RequestNotificationEmailServiceImpl();
         ReflectionTestUtils.setField(service, "fromAddress", "no-reply@carpoolutec.local");
 
         assertDoesNotThrow(() -> service.sendStatusEmail(null, "Juan", "Viaje a UTEC", Status.REJECTED));

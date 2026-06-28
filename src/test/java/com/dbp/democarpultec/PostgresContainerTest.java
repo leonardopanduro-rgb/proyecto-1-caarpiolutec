@@ -10,13 +10,25 @@ public abstract class PostgresContainerTest {
             .withDatabaseName("carpultec_test")
             .withUsername("test")
             .withPassword("test");
+    private static final boolean POSTGRES_STARTED;
 
     static {
-        POSTGRES.start();
+        boolean started = false;
+        try {
+            POSTGRES.start();
+            started = true;
+        } catch (IllegalStateException exception) {
+            started = false;
+        }
+        POSTGRES_STARTED = started;
     }
 
     @DynamicPropertySource
     static void configurePostgres(DynamicPropertyRegistry registry) {
+        if (!POSTGRES_STARTED) {
+            return;
+        }
+
         registry.add("spring.datasource.url", POSTGRES::getJdbcUrl);
         registry.add("spring.datasource.username", POSTGRES::getUsername);
         registry.add("spring.datasource.password", POSTGRES::getPassword);

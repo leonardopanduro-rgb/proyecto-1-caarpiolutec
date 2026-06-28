@@ -7,6 +7,7 @@ import com.dbp.democarpultec.exception.ForbiddenException;
 import com.dbp.democarpultec.model.User;
 import com.dbp.democarpultec.model.Vehicle;
 import com.dbp.democarpultec.repository.VehicleRepository;
+import com.dbp.democarpultec.service.impl.VehicleServiceImpl;
 import jakarta.persistence.EntityNotFoundException;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -28,7 +29,7 @@ public class VehicleServiceTest {
     private UserService userService;
 
     @InjectMocks
-    private VehicleService vehicleService;
+    private VehicleServiceImpl vehicleService;
 
     @Test
     void shouldCreateVehicleWhenValidData(){

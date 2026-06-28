@@ -17,10 +17,10 @@ public class RequestStatusChangedListener {
     @EventListener
     public void onRequestStatusChanged(RequestStatusChangedEvent event) {
         requestNotificationEmailService.sendStatusEmail(
-                event.email(),
-                event.name(),
-                event.publicationTitle(),
-                event.status()
+                event.getEmail(),
+                event.getName(),
+                event.getPublicationTitle(),
+                event.getStatus()
         );
     }
 }

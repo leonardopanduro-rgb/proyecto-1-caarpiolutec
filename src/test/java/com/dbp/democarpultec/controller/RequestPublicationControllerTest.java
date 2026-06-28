@@ -88,7 +88,7 @@ public class RequestPublicationControllerTest {
     void shouldReturnAllRequestPublicationsWhenRequestsExist() throws Exception {
         when(requestPublicationService.findAll()).thenReturn(List.of(buildResponse()));
 
-        mockMvc.perform(get("/api/request-publications"))
+        mockMvc.perform(get("/api/v1/request-publications"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.length()").value(1))
                 .andExpect(jsonPath("$[0].status").value("PENDING"))
@@ -101,7 +101,7 @@ public class RequestPublicationControllerTest {
     void shouldReturnEmptyListWhenNoRequestPublicationsExist() throws Exception {
         when(requestPublicationService.findAll()).thenReturn(List.of());
 
-        mockMvc.perform(get("/api/request-publications"))
+        mockMvc.perform(get("/api/v1/request-publications"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.length()").value(0));
     }
@@ -110,7 +110,7 @@ public class RequestPublicationControllerTest {
     void shouldReturnRequestPublicationWhenIdExists() throws Exception {
         when(requestPublicationService.findById(1L)).thenReturn(buildResponse());
 
-        mockMvc.perform(get("/api/request-publications/1"))
+        mockMvc.perform(get("/api/v1/request-publications/1"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.id").value(1))
                 .andExpect(jsonPath("$.requesterId").value(2))
@@ -124,7 +124,7 @@ public class RequestPublicationControllerTest {
     void shouldReturn404WhenRequestPublicationNotFound() throws Exception {
         when(requestPublicationService.findById(99L)).thenThrow(new EntityNotFoundException("RequestPublication not found with id 99"));
 
-        mockMvc.perform(get("/api/request-publications/99"))
+        mockMvc.perform(get("/api/v1/request-publications/99"))
                 .andExpect(status().isNotFound());
 
         verify(requestPublicationService).findById(99L);
@@ -135,7 +135,7 @@ public class RequestPublicationControllerTest {
         when(authService.getCurrentUserByEmail("carlos@utec.edu.pe")).thenReturn(buildCurrentUser());
         when(requestPublicationService.createAuthenticated(eq(2L), any(RequestPublicationRequestDto.class))).thenReturn(buildResponse());
 
-        mockMvc.perform(post("/api/request-publications")
+        mockMvc.perform(post("/api/v1/request-publications")
                         .principal(() -> "carlos@utec.edu.pe")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(buildRequest())))
@@ -156,7 +156,7 @@ public class RequestPublicationControllerTest {
                 .seats(0)
                 .build();
 
-        mockMvc.perform(post("/api/request-publications")
+        mockMvc.perform(post("/api/v1/request-publications")
                         .principal(() -> "carlos@utec.edu.pe")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(invalid)))
@@ -171,7 +171,7 @@ public class RequestPublicationControllerTest {
                 .seats(1)
                 .build();
 
-        mockMvc.perform(post("/api/request-publications")
+        mockMvc.perform(post("/api/v1/request-publications")
                         .principal(() -> "carlos@utec.edu.pe")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(invalid)))
@@ -206,7 +206,7 @@ public class RequestPublicationControllerTest {
                 .pickupPointOrDestine("Av. Benavides 500")
                 .build();
 
-        mockMvc.perform(put("/api/request-publications/1")
+        mockMvc.perform(put("/api/v1/request-publications/1")
                         .principal(() -> "carlos@utec.edu.pe")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(req)))
@@ -223,7 +223,7 @@ public class RequestPublicationControllerTest {
         when(authService.getCurrentUserByEmail("carlos@utec.edu.pe")).thenReturn(buildCurrentUser());
         when(requestPublicationService.updateAuthenticated(eq(99L), eq(2L), any(RequestPublicationRequestDto.class))).thenThrow(new EntityNotFoundException("RequestPublication not found with id 99"));
 
-        mockMvc.perform(put("/api/request-publications/99")
+        mockMvc.perform(put("/api/v1/request-publications/99")
                         .principal(() -> "carlos@utec.edu.pe")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(buildRequest())))
@@ -237,7 +237,7 @@ public class RequestPublicationControllerTest {
         when(authService.getCurrentUserByEmail("carlos@utec.edu.pe")).thenReturn(buildCurrentUser());
         doNothing().when(requestPublicationService).deleteAuthenticated(1L, 2L);
 
-        mockMvc.perform(delete("/api/request-publications/1")
+        mockMvc.perform(delete("/api/v1/request-publications/1")
                         .principal(() -> "carlos@utec.edu.pe"))
                 .andExpect(status().isNoContent());
 
@@ -249,7 +249,7 @@ public class RequestPublicationControllerTest {
         when(authService.getCurrentUserByEmail("carlos@utec.edu.pe")).thenReturn(buildCurrentUser());
         doThrow(new EntityNotFoundException("RequestPublication not found with id 99")).when(requestPublicationService).deleteAuthenticated(99L, 2L);
 
-        mockMvc.perform(delete("/api/request-publications/99")
+        mockMvc.perform(delete("/api/v1/request-publications/99")
                         .principal(() -> "carlos@utec.edu.pe"))
                 .andExpect(status().isNotFound());
 
@@ -264,7 +264,7 @@ public class RequestPublicationControllerTest {
         when(authService.getCurrentUserByEmail("carlos@utec.edu.pe")).thenReturn(buildCurrentUser());
         when(requestPublicationService.cancel(1L, 2L)).thenReturn(cancelled);
 
-        mockMvc.perform(patch("/api/request-publications/1/cancel")
+        mockMvc.perform(patch("/api/v1/request-publications/1/cancel")
                         .principal(() -> "carlos@utec.edu.pe"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.status").value("CANCELLED"));
@@ -278,7 +278,7 @@ public class RequestPublicationControllerTest {
         when(authService.getCurrentUserByEmail("carlos@utec.edu.pe")).thenReturn(buildCurrentUser());
         when(requestPublicationService.reject(1L, 2L)).thenReturn(rejected);
 
-        mockMvc.perform(patch("/api/request-publications/1/reject")
+        mockMvc.perform(patch("/api/v1/request-publications/1/reject")
                         .principal(() -> "carlos@utec.edu.pe"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.status").value("REJECTED"));
@@ -290,7 +290,7 @@ public class RequestPublicationControllerTest {
         when(requestPublicationService.reject(1L, 2L))
                 .thenThrow(new ForbiddenException("You are not the owner of this publication"));
 
-        mockMvc.perform(patch("/api/request-publications/1/reject")
+        mockMvc.perform(patch("/api/v1/request-publications/1/reject")
                         .principal(() -> "carlos@utec.edu.pe"))
                 .andExpect(status().isForbidden());
     }
@@ -303,7 +303,7 @@ public class RequestPublicationControllerTest {
         when(authService.getCurrentUserByEmail("carlos@utec.edu.pe")).thenReturn(buildCurrentUser());
         when(requestPublicationService.accept(1L, 2L, 7L)).thenReturn(accepted);
 
-        mockMvc.perform(patch("/api/request-publications/1/accept")
+        mockMvc.perform(patch("/api/v1/request-publications/1/accept")
                         .principal(() -> "carlos@utec.edu.pe")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("""
@@ -321,7 +321,7 @@ public class RequestPublicationControllerTest {
     void shouldReturn400WhenAcceptRequestDoesNotIncludeVehicleId() throws Exception {
         when(authService.getCurrentUserByEmail("carlos@utec.edu.pe")).thenReturn(buildCurrentUser());
 
-        mockMvc.perform(patch("/api/request-publications/1/accept")
+        mockMvc.perform(patch("/api/v1/request-publications/1/accept")
                         .principal(() -> "carlos@utec.edu.pe")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("{}"))
@@ -336,7 +336,7 @@ public class RequestPublicationControllerTest {
         when(requestPublicationService.accept(1L, 2L, 7L))
                 .thenThrow(new ForbiddenException("You are not the owner of this publication"));
 
-        mockMvc.perform(patch("/api/request-publications/1/accept")
+        mockMvc.perform(patch("/api/v1/request-publications/1/accept")
                         .principal(() -> "carlos@utec.edu.pe")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("""

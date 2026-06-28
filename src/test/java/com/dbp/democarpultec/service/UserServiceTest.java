@@ -5,6 +5,7 @@ import com.dbp.democarpultec.dto.UserResponseDto;
 import com.dbp.democarpultec.model.User;
 import com.dbp.democarpultec.model.enums.Carreras;
 import com.dbp.democarpultec.repository.UserRepository;
+import com.dbp.democarpultec.service.impl.UserServiceImpl;
 import jakarta.persistence.EntityNotFoundException;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -23,7 +24,7 @@ public class UserServiceTest {
     private UserRepository userRepository;
 
     @InjectMocks
-    private UserService userService;
+    private UserServiceImpl userService;
 
     @Test
     void shouldCreateUserWhenValidData() {
