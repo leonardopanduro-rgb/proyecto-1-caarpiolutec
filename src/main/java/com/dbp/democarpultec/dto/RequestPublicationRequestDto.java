@@ -31,6 +31,10 @@ public class RequestPublicationRequestDto {
     @Size(max = 500)
     private String message;
 
+    // Tarifa que ofrece el solicitante (aporte en S/). Opcional.
+    @DecimalMin(value = "0.0")
+    private Double proposedFare;
+
     @NotBlank
     @Size(max = 120)
     private String pickupPointOrDestine;

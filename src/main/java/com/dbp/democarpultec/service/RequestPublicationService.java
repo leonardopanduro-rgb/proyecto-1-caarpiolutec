@@ -38,4 +38,8 @@ public interface RequestPublicationService {
     RequestPublicationResponseDto cancel(Long requestId, Long authenticatedUserId);
 
     RequestPublicationResponseDto accept(Long requestId, Long authenticatedUserId, Long vehicleId);
+
+    RequestPublicationResponseDto counter(Long requestId, Long authenticatedUserId, Double counterFare);
+
+    RequestPublicationResponseDto acceptCounter(Long requestId, Long authenticatedUserId, Long vehicleId);
 }

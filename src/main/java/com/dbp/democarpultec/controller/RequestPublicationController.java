@@ -1,6 +1,8 @@
 package com.dbp.democarpultec.controller;
 
+import com.dbp.democarpultec.dto.AcceptCounterRequestDto;
 import com.dbp.democarpultec.dto.RequestPublicationAcceptRequestDto;
+import com.dbp.democarpultec.dto.RequestPublicationCounterRequestDto;
 import com.dbp.democarpultec.dto.RequestPublicationRequestDto;
 import com.dbp.democarpultec.dto.RequestPublicationResponseDto;
 import com.dbp.democarpultec.dto.UserResponseDto;
@@ -61,6 +63,27 @@ public class RequestPublicationController {
     ) {
         UserResponseDto currentUser = authService.getCurrentUserByEmail(principal.getName());
         return requestPublicationService.accept(id, currentUser.getId(), acceptRequest.getVehicleId());
+    }
+
+    @PatchMapping("/{id}/counter")
+    public RequestPublicationResponseDto counter(
+            Principal principal,
+            @PathVariable Long id,
+            @Valid @RequestBody RequestPublicationCounterRequestDto counterRequest
+    ) {
+        UserResponseDto currentUser = authService.getCurrentUserByEmail(principal.getName());
+        return requestPublicationService.counter(id, currentUser.getId(), counterRequest.getCounterFare());
+    }
+
+    @PatchMapping("/{id}/accept-counter")
+    public RequestPublicationResponseDto acceptCounter(
+            Principal principal,
+            @PathVariable Long id,
+            @RequestBody(required = false) AcceptCounterRequestDto body
+    ) {
+        UserResponseDto currentUser = authService.getCurrentUserByEmail(principal.getName());
+        Long vehicleId = body == null ? null : body.getVehicleId();
+        return requestPublicationService.acceptCounter(id, currentUser.getId(), vehicleId);
     }
 
     @PostMapping

@@ -46,4 +46,9 @@ public class RidePassenger {
 
     // Opcional: punto donde lo recogen
     private String pickupPoint;
+
+    // Coordenadas exactas de la parada (marcadas por el pasajero en el mapa).
+    private Double pickupLatitude;
+
+    private Double pickupLongitude;
 }

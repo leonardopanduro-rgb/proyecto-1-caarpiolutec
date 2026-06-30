@@ -34,7 +34,7 @@ import java.util.List;
 @Service
 @RequiredArgsConstructor
 public class RequestPublicationServiceImpl implements RequestPublicationService {
-    private static final EnumSet<Status> ACTIVE_REQUEST_STATUSES = EnumSet.of(Status.PENDING, Status.ACCEPTED);
+    private static final EnumSet<Status> ACTIVE_REQUEST_STATUSES = EnumSet.of(Status.PENDING, Status.COUNTERED, Status.ACCEPTED);
 
     private final RequestPublicationRepository requestPublicationRepository;
     private final RideRepository rideRepository;
@@ -126,7 +126,7 @@ public class RequestPublicationServiceImpl implements RequestPublicationService 
     public RequestPublicationResponseDto reject(Long requestId, Long authenticatedUserId) {
         RequestPublication request = findEntityById(requestId);
         validateAuthorOwnership(request.getPublication(), authenticatedUserId);
-        ensurePendingStatus(request);
+        ensureNegotiable(request);
 
         request.setStatus(Status.REJECTED);
         RequestPublication saved = requestPublicationRepository.save(request);
@@ -137,7 +137,7 @@ public class RequestPublicationServiceImpl implements RequestPublicationService 
     public RequestPublicationResponseDto cancel(Long requestId, Long authenticatedUserId) {
         RequestPublication request = findEntityById(requestId);
         validateRequesterOwnership(request, authenticatedUserId);
-        ensurePendingStatus(request);
+        ensureNegotiable(request);
 
         request.setStatus(Status.CANCELLED);
         RequestPublication saved = requestPublicationRepository.save(request);
@@ -150,12 +150,38 @@ public class RequestPublicationServiceImpl implements RequestPublicationService 
         RequestPublication request = findEntityById(requestId);
         validateAuthorOwnership(request.getPublication(), authenticatedUserId);
         ensurePendingStatus(request);
+        Vehicle vehicle = resolveVehicleForAcceptedRequest(request.getPublication(), vehicleId);
+        return finalizeAcceptance(request, vehicle, request.getProposedFare());
+    }
 
+    @Transactional
+    public RequestPublicationResponseDto counter(Long requestId, Long authenticatedUserId, Double counterFare) {
+        RequestPublication request = findEntityById(requestId);
+        validateAuthorOwnership(request.getPublication(), authenticatedUserId);
+        ensurePendingStatus(request);
+
+        request.setCounterFare(counterFare);
+        request.setStatus(Status.COUNTERED);
+        RequestPublication saved = requestPublicationRepository.save(request);
+        publishStatusChanged(saved, saved.getRequester());
+        return toResponseDto(saved);
+    }
+
+    @Transactional
+    public RequestPublicationResponseDto acceptCounter(Long requestId, Long authenticatedUserId, Long vehicleId) {
+        RequestPublication request = findEntityById(requestId);
+        validateRequesterOwnership(request, authenticatedUserId);
+        if (request.getStatus() != Status.COUNTERED) {
+            throw new BusinessRuleException("Only countered requests can be accepted by the requester");
+        }
+        Vehicle vehicle = resolveVehicleForCounter(request.getPublication(), vehicleId);
+        return finalizeAcceptance(request, vehicle, request.getCounterFare());
+    }
+
+    private RequestPublicationResponseDto finalizeAcceptance(RequestPublication request, Vehicle vehicle, Double agreedFare) {
         Publication publication = request.getPublication();
         User driver = resolveDriver(publication, request);
         User passenger = resolvePassenger(publication, request);
-
-        Vehicle vehicle = resolveVehicleForAcceptedRequest(publication, vehicleId);
         validateVehicleOwnership(vehicle, driver);
 
         Ride existingRide = rideRepository.findByPublication_Id(publication.getId()).orElse(null);
@@ -167,7 +193,7 @@ public class RequestPublicationServiceImpl implements RequestPublicationService 
                     : rideRepository.save(createRide(publication, driver, vehicle));
 
             validateAvailableSeats(ride, publication, request.getSeats());
-            addPassengerToRide(ride, passenger, request.getSeats(), request.getPickupPointOrDestine());
+            addPassengerToRide(ride, passenger, request.getSeats(), request);
             ride.setVehicle(vehicle);
             rideRepository.save(ride);
         } else {
@@ -177,15 +203,29 @@ public class RequestPublicationServiceImpl implements RequestPublicationService 
 
             validatePassengerPublicationCapacity(publication, request, vehicle);
             Ride ride = rideRepository.save(createRide(publication, driver, vehicle));
-            addPassengerToRide(ride, passenger, publication.getSeats(), request.getPickupPointOrDestine());
+            addPassengerToRide(ride, passenger, publication.getSeats(), request);
             rideRepository.save(ride);
             rejectOtherPendingRequests(publication.getId(), request.getId());
         }
 
+        request.setAgreedFare(agreedFare);
         request.setStatus(Status.ACCEPTED);
         RequestPublication saved = requestPublicationRepository.save(request);
         publishStatusChanged(saved, saved.getRequester());
         return toResponseDto(saved);
+    }
+
+    private Vehicle resolveVehicleForCounter(Publication publication, Long vehicleId) {
+        if (Boolean.TRUE.equals(publication.getDriverToPassenger())) {
+            if (publication.getVehicle() == null) {
+                throw new BusinessRuleException("Driver publication has no selected vehicle");
+            }
+            return publication.getVehicle();
+        }
+        if (vehicleId == null) {
+            throw new BusinessRuleException("vehicleId is required to accept the counter offer");
+        }
+        return vehicleService.findEntityById(vehicleId);
     }
 
     private void updateEntity(RequestPublication request, RequestPublicationRequestDto dto) {
@@ -210,6 +250,7 @@ public class RequestPublicationServiceImpl implements RequestPublicationService 
         request.setRequesterIsDriver(dto.getRequesterIsDriver());
         request.setSeats(dto.getSeats());
         request.setMessage(dto.getMessage());
+        request.setProposedFare(dto.getProposedFare());
         request.setPickupPointOrDestine(dto.getPickupPointOrDestine());
         request.setExternalLatitude(latitude);
         request.setExternalLongitude(longitude);
@@ -229,6 +270,7 @@ public class RequestPublicationServiceImpl implements RequestPublicationService 
 
         request.setSeats(dto.getSeats());
         request.setMessage(dto.getMessage());
+        request.setProposedFare(dto.getProposedFare());
         request.setPickupPointOrDestine(dto.getPickupPointOrDestine());
         request.setExternalLatitude(latitude);
         request.setExternalLongitude(longitude);
@@ -291,6 +333,12 @@ public class RequestPublicationServiceImpl implements RequestPublicationService 
         }
     }
 
+    private void ensureNegotiable(RequestPublication request) {
+        if (request.getStatus() != Status.PENDING && request.getStatus() != Status.COUNTERED) {
+            throw new BusinessRuleException("Only pending or countered requests can change state");
+        }
+    }
+
     private Long requirePublicationId(RequestPublicationRequestDto dto) {
         if (dto.getPublicationId() == null) {
             throw new BusinessRuleException("publicationId is required");
@@ -315,7 +363,19 @@ public class RequestPublicationServiceImpl implements RequestPublicationService 
                 ))
                 .status(request.getStatus())
                 .createdAt(request.getCreatedAt())
+                .requesterName(buildFullName(request.getRequester()))
+                .requesterCareer(request.getRequester().getCareer())
+                .requesterRating(request.getRequester().getRating())
+                .proposedFare(request.getProposedFare())
+                .counterFare(request.getCounterFare())
+                .agreedFare(request.getAgreedFare())
                 .build();
+    }
+
+    private String buildFullName(User user) {
+        String first = user.getName() == null ? "" : user.getName();
+        String last = user.getLastName() == null ? "" : user.getLastName();
+        return (first + " " + last).trim();
     }
 
     private User resolveDriver(Publication publication, RequestPublication request) {
@@ -387,7 +447,7 @@ public class RequestPublicationServiceImpl implements RequestPublicationService 
         }
     }
 
-    private void addPassengerToRide(Ride ride, User passenger, Integer seatsReserved, String pickupPoint) {
+    private void addPassengerToRide(Ride ride, User passenger, Integer seatsReserved, RequestPublication request) {
         boolean alreadyInRide = ride.getId() != null
                 && ridePassengerRepository.existsByRide_IdAndPassenger_Id(ride.getId(), passenger.getId());
         if (alreadyInRide) {
@@ -398,7 +458,9 @@ public class RequestPublicationServiceImpl implements RequestPublicationService 
                 .ride(ride)
                 .passenger(passenger)
                 .seatsReserved(seatsReserved)
-                .pickupPoint(pickupPoint)
+                .pickupPoint(request.getPickupPointOrDestine())
+                .pickupLatitude(request.getExternalLatitude())
+                .pickupLongitude(request.getExternalLongitude())
                 .build();
         ridePassengerRepository.save(ridePassenger);
     }

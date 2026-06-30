@@ -52,7 +52,14 @@ public class RequestPublication {
 
     private String message;
 
+    // Tarifa propuesta por el solicitante (aporte sugerido en S/).
+    private Double proposedFare;
 
+    // Contraoferta del autor de la publicacion.
+    private Double counterFare;
+
+    // Tarifa final acordada cuando la solicitud es aceptada.
+    private Double agreedFare;
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)

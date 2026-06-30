@@ -3,6 +3,7 @@ package com.dbp.democarpultec.service.impl;
 import com.dbp.democarpultec.dto.RidePassengerRequestDto;
 import com.dbp.democarpultec.dto.RidePassengerResponseDto;
 import com.dbp.democarpultec.model.RidePassenger;
+import com.dbp.democarpultec.model.User;
 import com.dbp.democarpultec.repository.RidePassengerRepository;
 import com.dbp.democarpultec.service.RidePassengerService;
 import com.dbp.democarpultec.service.RideService;
@@ -10,6 +11,7 @@ import com.dbp.democarpultec.service.UserService;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
@@ -21,10 +23,12 @@ public class RidePassengerServiceImpl implements RidePassengerService {
     private final UserService userService;
     private final RideService rideService;
 
+    @Transactional(readOnly = true)
     public List<RidePassengerResponseDto> findAll() {
         return ridePassengerRepository.findAll().stream().map(this::toResponseDto).toList();
     }
 
+    @Transactional(readOnly = true)
     public RidePassengerResponseDto findById(Long id) {
         return toResponseDto(findEntityById(id));
     }
@@ -61,12 +65,24 @@ public class RidePassengerServiceImpl implements RidePassengerService {
     }
 
     private RidePassengerResponseDto toResponseDto(RidePassenger passenger) {
+        User user = passenger.getPassenger();
         return RidePassengerResponseDto.builder()
                 .id(passenger.getId())
-                .passengerId(passenger.getPassenger().getId())
+                .passengerId(user.getId())
                 .rideId(passenger.getRide().getId())
                 .seatsReserved(passenger.getSeatsReserved())
                 .pickupPoint(passenger.getPickupPoint())
+                .passengerName(buildFullName(user))
+                .passengerCareer(user.getCareer())
+                .passengerRating(user.getRating())
+                .pickupLatitude(passenger.getPickupLatitude())
+                .pickupLongitude(passenger.getPickupLongitude())
                 .build();
+    }
+
+    private String buildFullName(User user) {
+        String first = user.getName() == null ? "" : user.getName();
+        String last = user.getLastName() == null ? "" : user.getLastName();
+        return (first + " " + last).trim();
     }
 }
