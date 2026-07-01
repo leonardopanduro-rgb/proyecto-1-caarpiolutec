@@ -301,6 +301,14 @@ public class RequestPublicationServiceImpl implements RequestPublicationService 
             throw new BusinessRuleException("Requester role must be opposite to publication role");
         }
 
+        // Un pasajero no puede solicitar mas asientos de los que ofrece la publicacion del conductor.
+        if (Boolean.TRUE.equals(publication.getDriverToPassenger())
+                && dto.getSeats() != null
+                && dto.getSeats() > publication.getSeats()) {
+            throw new BusinessRuleException(
+                    "Requested seats exceed the seats offered in this publication (max " + publication.getSeats() + ")");
+        }
+
         boolean hasActiveRequest = requestPublicationRepository.existsByPublication_IdAndRequester_IdAndStatusIn(
                 publication.getId(),
                 requesterId,

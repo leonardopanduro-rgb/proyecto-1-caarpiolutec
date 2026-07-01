@@ -1,5 +1,6 @@
 package com.dbp.democarpultec.service;
 
+import com.dbp.democarpultec.dto.PublicUserResponseDto;
 import com.dbp.democarpultec.dto.UserRequestDto;
 import com.dbp.democarpultec.dto.UserResponseDto;
 import com.dbp.democarpultec.model.User;
@@ -10,6 +11,8 @@ public interface UserService {
     List<UserResponseDto> findAll();
 
     UserResponseDto findById(Long id);
+
+    PublicUserResponseDto findPublicById(Long id);
 
     UserResponseDto create(UserRequestDto dto);
 

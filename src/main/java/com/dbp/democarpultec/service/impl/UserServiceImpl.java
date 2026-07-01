@@ -1,5 +1,6 @@
 package com.dbp.democarpultec.service.impl;
 
+import com.dbp.democarpultec.dto.PublicUserResponseDto;
 import com.dbp.democarpultec.dto.UserRequestDto;
 import com.dbp.democarpultec.dto.UserResponseDto;
 import com.dbp.democarpultec.model.User;
@@ -23,6 +24,10 @@ public class UserServiceImpl implements UserService {
 
     public UserResponseDto findById(Long id) {
         return toResponseDto(findEntityById(id));
+    }
+
+    public PublicUserResponseDto findPublicById(Long id) {
+        return toPublicResponseDto(findEntityById(id));
     }
 
     public UserResponseDto create(UserRequestDto dto) {
@@ -68,6 +73,16 @@ public class UserServiceImpl implements UserService {
         User user = findEntityById(userId);
         user.setRating(rating);
         userRepository.save(user);
+    }
+
+    private PublicUserResponseDto toPublicResponseDto(User user) {
+        return PublicUserResponseDto.builder()
+                .id(user.getId())
+                .name(user.getName())
+                .lastName(user.getLastName())
+                .career(user.getCareer())
+                .rating(user.getRating())
+                .build();
     }
 
     private UserResponseDto toResponseDto(User user) {

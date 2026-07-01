@@ -1,5 +1,6 @@
 package com.dbp.democarpultec.controller;
 
+import com.dbp.democarpultec.dto.PublicUserResponseDto;
 import com.dbp.democarpultec.dto.UserRequestDto;
 import com.dbp.democarpultec.dto.UserResponseDto;
 import com.dbp.democarpultec.service.AuthService;
@@ -32,6 +33,13 @@ public class UserController {
     @PreAuthorize("hasRole('ADMIN')")
     public UserResponseDto findById(@PathVariable Long id) {
         return userService.findById(id);
+    }
+
+    // Perfil publico (sin datos sensibles): cualquier usuario autenticado puede verlo.
+    @GetMapping("/{id}/public")
+    @PreAuthorize("hasAnyRole('USER', 'ADMIN')")
+    public PublicUserResponseDto findPublicById(@PathVariable Long id) {
+        return userService.findPublicById(id);
     }
 
     @GetMapping("/me")
