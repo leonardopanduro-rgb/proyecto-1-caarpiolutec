@@ -147,6 +147,44 @@ public class VehicleControllerTest {
     }
 
     @Test
+    void shouldReturn400WhenPlateFormatIsInvalid() throws Exception {
+        VehicleRequestDto invalid = VehicleRequestDto.builder()
+                .plate("AB")
+                .brand("Toyota")
+                .model("Corolla")
+                .color("Blanco")
+                .seats(4)
+                .build();
+
+        mockMvc.perform(post("/api/v1/vehicles")
+                        .principal(() -> "juan@utec.edu.pe")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(invalid)))
+                .andExpect(status().isBadRequest());
+
+        verify(vehicleService, never()).createAuthenticated(anyLong(), any());
+    }
+
+    @Test
+    void shouldReturn400WhenSeatsExceedMaximum() throws Exception {
+        VehicleRequestDto invalid = VehicleRequestDto.builder()
+                .plate("ABC-123")
+                .brand("Toyota")
+                .model("Corolla")
+                .color("Blanco")
+                .seats(999)
+                .build();
+
+        mockMvc.perform(post("/api/v1/vehicles")
+                        .principal(() -> "juan@utec.edu.pe")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(invalid)))
+                .andExpect(status().isBadRequest());
+
+        verify(vehicleService, never()).createAuthenticated(anyLong(), any());
+    }
+
+    @Test
     void shouldUpdateVehicleWhenValidRequest() throws Exception {
         VehicleResponseDto updated = VehicleResponseDto.builder()
                 .id(1L)

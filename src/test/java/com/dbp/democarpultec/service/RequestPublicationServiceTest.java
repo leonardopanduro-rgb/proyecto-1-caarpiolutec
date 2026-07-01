@@ -334,6 +334,30 @@ public class RequestPublicationServiceTest {
     }
 
     @Test
+    void shouldThrowBusinessRuleWhenPublicationAlreadyDeparted() {
+        RequestPublicationRequestDto dto = RequestPublicationRequestDto.builder()
+                .publicationId(1L)
+                .requesterIsDriver(false)
+                .seats(1)
+                .pickupPointOrDestine("San Miguel")
+                .build();
+
+        User author = new User();
+        author.setId(1L);
+
+        Publication publication = new Publication();
+        publication.setId(1L);
+        publication.setAuthor(author);
+        publication.setDriverToPassenger(true);
+        publication.setDepartureTime(LocalDateTime.now().minusHours(2));
+
+        when(publicationService.findEntityById(1L)).thenReturn(publication);
+
+        assertThrows(BusinessRuleException.class, () -> requestPublicationService.createAuthenticated(2L, dto));
+        verify(requestPublicationRepository, never()).save(any());
+    }
+
+    @Test
     void shouldThrowDuplicateWhenActiveRequestAlreadyExists() {
         RequestPublicationRequestDto dto = RequestPublicationRequestDto.builder()
                 .publicationId(1L)

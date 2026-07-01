@@ -53,7 +53,8 @@ public class PublicationControllerTest {
         objectMapper.registerModule(new JavaTimeModule());
     }
 
-    private final LocalDateTime departureTime = LocalDateTime.of(2025, 6, 1, 7, 30);
+    // La publicacion exige salida futura (@Future), por eso usamos un instante por delante del ahora.
+    private final LocalDateTime departureTime = LocalDateTime.now().plusDays(1).withNano(0);
 
     private PublicationResponseDto buildResponse() {
         return PublicationResponseDto.builder()
@@ -232,6 +233,27 @@ public class PublicationControllerTest {
                 .titulo("Viaje")
                 .destinationOrOrigin("Barranco")
                 .departureTime(departureTime)
+                .authorId(1L)
+                .build();
+
+        mockMvc.perform(post("/api/v1/publications")
+                        .principal(() -> "juan@utec.edu.pe")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(invalid)))
+                .andExpect(status().isBadRequest());
+
+        verify(publicationService, never()).createAuthenticated(anyLong(), any());
+    }
+
+    @Test
+    void shouldReturn400WhenDepartureTimeIsInThePast() throws Exception {
+        PublicationRequestDto invalid = PublicationRequestDto.builder()
+                .fromUTEC(true)
+                .driverToPassenger(true)
+                .seats(2)
+                .titulo("Viaje")
+                .destinationOrOrigin("Barranco")
+                .departureTime(LocalDateTime.now().minusDays(1))
                 .authorId(1L)
                 .build();
 

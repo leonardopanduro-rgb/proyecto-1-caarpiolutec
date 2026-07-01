@@ -1,5 +1,6 @@
 package com.dbp.democarpultec.dto;
 
+import jakarta.validation.constraints.Future;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
@@ -49,6 +50,7 @@ public class PublicationRequestDto {
     private Double externalLongitude;
 
     @NotNull
+    @Future(message = "La fecha y hora de salida deben estar en el futuro")
     private LocalDateTime departureTime;
 
     private Long vehicleId;

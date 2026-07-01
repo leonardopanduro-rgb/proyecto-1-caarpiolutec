@@ -3,6 +3,7 @@ package com.dbp.democarpultec.service.impl;
 import com.dbp.democarpultec.dto.VehicleRequestDto;
 import com.dbp.democarpultec.dto.VehicleResponseDto;
 import com.dbp.democarpultec.exception.BusinessRuleException;
+import com.dbp.democarpultec.exception.DuplicateResourceException;
 import com.dbp.democarpultec.exception.ForbiddenException;
 import com.dbp.democarpultec.model.User;
 import com.dbp.democarpultec.model.Vehicle;
@@ -36,6 +37,11 @@ public class VehicleServiceImpl implements VehicleService {
             throw new BusinessRuleException("A user can register up to 2 vehicles");
         }
 
+        String plate = normalizePlate(dto.getPlate());
+        if (vehicleRepository.existsByPlateIgnoreCase(plate)) {
+            throw new DuplicateResourceException("La placa ya esta registrada");
+        }
+
         User owner = userService.findEntityById(authenticatedUserId);
         Vehicle vehicle = new Vehicle();
         vehicle.setOwner(owner);
@@ -46,6 +52,12 @@ public class VehicleServiceImpl implements VehicleService {
     public VehicleResponseDto updateAuthenticated(Long id, Long authenticatedUserId, VehicleRequestDto dto) {
         Vehicle vehicle = findEntityById(id);
         validateOwnership(vehicle, authenticatedUserId);
+
+        String plate = normalizePlate(dto.getPlate());
+        if (vehicleRepository.existsByPlateIgnoreCaseAndIdNot(plate, id)) {
+            throw new DuplicateResourceException("La placa ya esta registrada");
+        }
+
         updateEntityData(vehicle, dto);
         return toResponseDto(vehicleRepository.save(vehicle));
     }
@@ -72,11 +84,15 @@ public class VehicleServiceImpl implements VehicleService {
     }
 
     private void updateEntityData(Vehicle vehicle, VehicleRequestDto dto) {
-        vehicle.setPlate(dto.getPlate());
+        vehicle.setPlate(normalizePlate(dto.getPlate()));
         vehicle.setBrand(dto.getBrand());
         vehicle.setModel(dto.getModel());
         vehicle.setColor(dto.getColor());
         vehicle.setSeats(dto.getSeats());
+    }
+
+    private String normalizePlate(String plate) {
+        return plate == null ? null : plate.trim().toUpperCase();
     }
 
     private void validateOwnership(Vehicle vehicle, Long authenticatedUserId) {

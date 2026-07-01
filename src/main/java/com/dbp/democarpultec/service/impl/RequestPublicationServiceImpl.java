@@ -28,6 +28,7 @@ import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
 import java.util.EnumSet;
 import java.util.List;
 
@@ -297,6 +298,12 @@ public class RequestPublicationServiceImpl implements RequestPublicationService 
             throw new BusinessRuleException("pickupPointOrDestine is required");
         }
 
+        // No se puede solicitar un viaje cuya hora de salida ya paso.
+        if (publication.getDepartureTime() != null
+                && publication.getDepartureTime().isBefore(LocalDateTime.now())) {
+            throw new BusinessRuleException("No puedes solicitar un viaje cuya salida ya paso");
+        }
+
         if (dto.getRequesterIsDriver().equals(publication.getDriverToPassenger())) {
             throw new BusinessRuleException("Requester role must be opposite to publication role");
         }
@@ -304,6 +311,7 @@ public class RequestPublicationServiceImpl implements RequestPublicationService 
         // Un pasajero no puede solicitar mas asientos de los que ofrece la publicacion del conductor.
         if (Boolean.TRUE.equals(publication.getDriverToPassenger())
                 && dto.getSeats() != null
+                && publication.getSeats() != null
                 && dto.getSeats() > publication.getSeats()) {
             throw new BusinessRuleException(
                     "Requested seats exceed the seats offered in this publication (max " + publication.getSeats() + ")");

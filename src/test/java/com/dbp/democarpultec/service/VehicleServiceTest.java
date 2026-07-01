@@ -3,6 +3,7 @@ package com.dbp.democarpultec.service;
 import com.dbp.democarpultec.dto.VehicleRequestDto;
 import com.dbp.democarpultec.dto.VehicleResponseDto;
 import com.dbp.democarpultec.exception.BusinessRuleException;
+import com.dbp.democarpultec.exception.DuplicateResourceException;
 import com.dbp.democarpultec.exception.ForbiddenException;
 import com.dbp.democarpultec.model.User;
 import com.dbp.democarpultec.model.Vehicle;
@@ -176,6 +177,22 @@ public class VehicleServiceTest {
         when(vehicleRepository.countByOwner_Id(1L)).thenReturn(2L);
 
         assertThrows(BusinessRuleException.class, () -> vehicleService.createAuthenticated(1L, dto));
+        verify(vehicleRepository, never()).save(any());
+    }
+
+    @Test
+    void shouldRejectDuplicatePlateOnCreate() {
+        VehicleRequestDto dto = VehicleRequestDto.builder()
+                .plate("abc-123")
+                .brand("Toyota")
+                .model("Corolla")
+                .seats(4)
+                .build();
+
+        // La placa se normaliza a mayusculas antes de consultar unicidad.
+        when(vehicleRepository.existsByPlateIgnoreCase("ABC-123")).thenReturn(true);
+
+        assertThrows(DuplicateResourceException.class, () -> vehicleService.createAuthenticated(1L, dto));
         verify(vehicleRepository, never()).save(any());
     }
 
